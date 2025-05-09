@@ -17,6 +17,8 @@ interface TransactionsContextType {
   error: string | null;
   summary: TransactionSummary;
   isAuthenticated: boolean;
+  lastAction: string | null;
+  setLastAction: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -26,10 +28,11 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [lastAction, setLastAction] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setIsAuthenticated(!!session);
       if (session) {
         fetchTransactions();
@@ -76,7 +79,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setTransactions(data || []);
+      setTransactions((data || []) as Transaction[]);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -104,7 +107,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (error) throw error;
       
-      setTransactions(prev => [data, ...prev]);
+      setTransactions(prev => [data as Transaction, ...prev]);
     } catch (err) {
       console.error('Error adding transaction:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -127,7 +130,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (error) throw error;
 
-      setTransactions(prev => prev.map(item => item.id === id ? data : item));
+      setTransactions(prev => prev.map(item => item.id === id ? (data as Transaction) : item));
     } catch (err) {
       console.error('Error editing transaction:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -178,7 +181,9 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       loading, 
       error, 
       summary,
-      isAuthenticated 
+      isAuthenticated,
+      lastAction,
+      setLastAction,
     }}>
       {children}
     </TransactionsContext.Provider>

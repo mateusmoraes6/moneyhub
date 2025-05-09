@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTransactions } from '../context/TransactionsContext';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 const Toast: React.FC = () => {
   const { lastAction, setLastAction } = useTransactions();

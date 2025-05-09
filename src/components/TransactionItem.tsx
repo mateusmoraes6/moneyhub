@@ -16,10 +16,11 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
   const [editedDescription, setEditedDescription] = useState(description);
   const [editedAmount, setEditedAmount] = useState(amount.toString());
   const [editedType, setEditedType] = useState(type);
+  const [editedDate, setEditedDate] = useState(date.split('T')[0]);
 
   const handleSave = () => {
     const amountValue = parseFloat(editedAmount);
-    if (!editedDescription.trim() || isNaN(amountValue) || amountValue <= 0) {
+    if (!editedDescription.trim() || isNaN(amountValue) || amountValue <= 0 || !editedDate) {
       return;
     }
 
@@ -27,6 +28,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
       description: editedDescription.trim(),
       amount: amountValue,
       type: editedType,
+      ...(editedDate && { date: new Date(editedDate).toISOString() }),
     });
     setIsEditing(false);
   };
@@ -35,6 +37,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
     setEditedDescription(description);
     setEditedAmount(amount.toString());
     setEditedType(type);
+    setEditedDate(date.split('T')[0]);
     setIsEditing(false);
   };
 
@@ -56,6 +59,12 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
             className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
             min="0.01"
             step="0.01"
+          />
+          <input
+            type="date"
+            value={editedDate}
+            onChange={(e) => setEditedDate(e.target.value)}
+            className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
           />
           <div className="grid grid-cols-2 gap-2">
             <button

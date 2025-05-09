@@ -9,6 +9,10 @@ const TransactionForm: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>('income');
   const [error, setError] = useState<string | null>(null);
+  const [date, setDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,19 +29,41 @@ const TransactionForm: React.FC = () => {
       return;
     }
     
+    if (!date) {
+      setError('Por favor, selecione uma data');
+      return;
+    }
+    
     // Add transaction
     addTransaction({
       description: description.trim(),
       amount: amountValue,
       type,
+      date: new Date(date).toISOString(), // Garante formato ISO
     });
     
     // Reset form
     setDescription('');
     setAmount('');
     setType('income');
+    setDate(new Date().toISOString().split('T')[0]);
     setError(null);
   };
+
+  // const handleSave = () => {
+  //   const amountValue = parseFloat(amount);
+  //   if (!description.trim() || isNaN(amountValue) || amountValue <= 0 || !date) {
+  //     return;
+  //   }
+
+  //   addTransaction({
+  //     description: description.trim(),
+  //     amount: amountValue,
+  //     type,
+  //     date: new Date(date).toISOString(),
+  //   });
+  //   setError(null);
+  // };
 
   if (!isAuthenticated) {
     return (
@@ -91,6 +117,20 @@ const TransactionForm: React.FC = () => {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+            Data
+          </label>
+          <input
+            type="date"
+            id="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+            required
           />
         </div>
         
