@@ -6,7 +6,7 @@ import TransactionList from '../components/TransactionList';
 
 const Dashboard: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black transition-colors duration-300">
+    <div className="min-h-screen bg-gray-950 transition-colors duration-300">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-3xl">
