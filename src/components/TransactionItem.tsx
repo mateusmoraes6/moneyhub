@@ -28,7 +28,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
       description: editedDescription.trim(),
       amount: amountValue,
       type: editedType,
-      ...(editedDate && { date: new Date(editedDate).toISOString() }),
+      date: editedDate,
     });
     setIsEditing(false);
   };

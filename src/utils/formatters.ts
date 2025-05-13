@@ -1,3 +1,5 @@
+import { format, parseISO } from 'date-fns';
+
 export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -6,10 +8,6 @@ export const formatCurrency = (value: number): string => {
 };
 
 export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
+  const date = parseISO(dateString.split('T')[0]);
+  return format(date, 'dd/MM/yyyy');
 };

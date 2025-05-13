@@ -41,7 +41,7 @@ const FinancialSummary: React.FC = () => {
   }
   
   return (
-    <section className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 md:p-6 transition-all duration-300">
+    <section className="w-full dark:bg-gray-900 rounded-xl shadow-sm p-4 md:p-6 transition-all duration-300">
       <div className="space-y-6">
         {/* Balance */}
         <div className="text-center">

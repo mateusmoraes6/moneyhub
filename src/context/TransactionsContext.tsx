@@ -11,7 +11,7 @@ interface TransactionSummary {
 interface TransactionsContextType {
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
-  editTransaction: (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id' | 'date'>) => Promise<void>;
+  editTransaction: (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   loading: boolean;
   error: string | null;
@@ -115,7 +115,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const editTransaction = async (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id' | 'date'>) => {
+  const editTransaction = async (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => {
     try {
       setError(null);
       const { data: { user } } = await supabase.auth.getUser();

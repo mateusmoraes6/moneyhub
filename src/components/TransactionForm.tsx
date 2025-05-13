@@ -39,7 +39,7 @@ const TransactionForm: React.FC = () => {
       description: description.trim(),
       amount: amountValue,
       type,
-      date: new Date(date).toISOString(), // Garante formato ISO
+      date: date, 
     });
     
     // Reset form
