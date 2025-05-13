@@ -35,16 +35,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type }) => {
 
   const handleGoogleLogin = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
         }
       });
 
       if (error) throw error;
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login com Google');
+    } finally {
+      setLoading(false);
     }
   };
 
