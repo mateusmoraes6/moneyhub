@@ -2,7 +2,7 @@ import React from 'react';
 import Header from '../components/Header';
 import FinancialSummary from '../components/FinancialSummary';
 import TransactionForm from '../components/TransactionForm';
-import TransactionList from '../components/TransactionList';
+import TransactionHistory from '../components/TransactionHistory';
 
 const Dashboard: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TransactionForm />
             <div className="space-y-6">
-              <TransactionList />
+              <TransactionHistory />
             </div>
           </div>
         </div>
