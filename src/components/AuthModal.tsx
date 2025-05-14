@@ -33,30 +33,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type }) => {
     return emailRegex.test(email);
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
-      });
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: 'google',
+  //       options: {
+  //         redirectTo: `${window.location.origin}/auth/callback`,
+  //         queryParams: {
+  //           access_type: 'offline',
+  //           prompt: 'consent'
+  //         }
+  //       }
+  //     });
 
-      if (error) throw error;
+  //     if (error) throw error;
       
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer login com Google');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Erro ao fazer login com Google');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +180,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type }) => {
           </div>
         )}
 
-        {!isForgotPassword && (
+        {/* {!isForgotPassword && (
           <button
             onClick={handleGoogleLogin}
             className="w-full bg-white hover:bg-gray-100 text-gray-900 font-medium py-3 px-4 rounded-lg transition-colors mb-4 flex items-center justify-center space-x-2"
@@ -205,16 +205,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, type }) => {
             </svg>
             <span>Continuar com Google</span>
           </button>
-        )}
+        )} */}
 
         {!isForgotPassword && (
           <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
+            {/* <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-gray-400 bg-gray-900">ou</span>
-            </div>
+            </div> */}
           </div>
         )}
 
