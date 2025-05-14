@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { PlusCircle, LogIn } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, LogIn, X, AlertCircle } from 'lucide-react';
 import { useTransactions } from '../context/TransactionsContext';
 import { TransactionType } from '../types';
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>('income');
@@ -13,6 +15,14 @@ const TransactionForm: React.FC = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
+
+  const resetForm = () => {
+    setDescription('');
+    setAmount('');
+    setType('income');
+    setDate(new Date().toISOString().split('T')[0]);
+    setError(null);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,28 +52,56 @@ const TransactionForm: React.FC = () => {
       date: date, 
     });
     
-    // Reset form
-    setDescription('');
-    setAmount('');
-    setType('income');
-    setDate(new Date().toISOString().split('T')[0]);
-    setError(null);
+    // Reset form and close modal
+    resetForm();
+    setIsModalOpen(false);
   };
 
-  // const handleSave = () => {
-  //   const amountValue = parseFloat(amount);
-  //   if (!description.trim() || isNaN(amountValue) || amountValue <= 0 || !date) {
-  //     return;
-  //   }
+  const openModal = () => {
+    if (isAuthenticated) {
+      setIsModalOpen(true);
+    }
+  };
 
-  //   addTransaction({
-  //     description: description.trim(),
-  //     amount: amountValue,
-  //     type,
-  //     date: new Date(date).toISOString(),
-  //   });
-  //   setError(null);
-  // };
+  const tryToCloseModal = () => {
+    const hasData = description || amount || type !== 'income' || date !== new Date().toISOString().split('T')[0];
+    
+    if (hasData) {
+      // Abrir modal de confirmação
+      setIsConfirmModalOpen(true);
+    } else {
+      setIsModalOpen(false);
+      resetForm();
+    }
+  };
+
+  const confirmClose = () => {
+    setIsConfirmModalOpen(false);
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const cancelClose = () => {
+    setIsConfirmModalOpen(false);
+  };
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isModalOpen && !isConfirmModalOpen) {
+        tryToCloseModal();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen, isConfirmModalOpen]);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      // Foque no primeiro input quando o modal abrir
+      const firstInput = document.getElementById('description');
+      if (firstInput) firstInput.focus();
+    }
+  }, [isModalOpen]);
 
   if (!isAuthenticated) {
     return (
@@ -80,97 +118,160 @@ const TransactionForm: React.FC = () => {
   }
 
   return (
-    <section className="w-full bg-gray-900 rounded-xl shadow-sm p-4 transition-all duration-300">
-      <h2 className="text-lg font-semibold text-white mb-4">Nova Transação</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-2 text-sm bg-red-900/30 text-red-300 rounded-lg">
-            {error}
-          </div>
-        )}
-        
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
-            Descrição
-          </label>
-          <input
-            type="text"
-            id="description"
-            placeholder="Ex: Salário, Mercado, etc."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
-            Valor
-          </label>
-          <input
-            type="number"
-            id="amount"
-            placeholder="0,00"
-            min="0.01"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
-          />
-        </div>
+    <>
+      {/* Botão para abrir o modal de nova transação */}
+      <button
+        onClick={openModal}
+        className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2 h-[50px]" // Altura fixa para corresponder ao outro botão
+      >
+        <PlusCircle className="w-5 h-5" />
+        <span>Nova Transação</span>
+      </button>
 
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
-            Data
-          </label>
-          <input
-            type="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
-            required
-          />
-        </div>
-        
-        <div>
-          <span className="block text-sm font-medium text-gray-300 mb-2">Tipo</span>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setType('income')}
-              className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                type === 'income'
-                  ? 'bg-emerald-900/40 text-emerald-300 border-2 border-emerald-500'
-                  : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-              }`}
-            >
-              Receita
-            </button>
-            <button
-              type="button"
-              onClick={() => setType('expense')}
-              className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                type === 'expense'
-                  ? 'bg-red-900/40 text-red-300 border-2 border-red-500'
-                  : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-              }`}
-            >
-              Despesa
-            </button>
+      {/* Modal para adicionar nova transação */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out">
+          <div className="bg-gray-900 rounded-xl w-full max-w-md max-h-[90vh] flex flex-col animate-fadeInUp">
+            {/* Cabeçalho da modal */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-800">
+              <h2 className="text-lg font-semibold text-white">Nova Transação</h2>
+              <button 
+                onClick={tryToCloseModal}
+                className="p-1 text-gray-400 hover:text-gray-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Formulário */}
+            <div className="p-4 overflow-y-auto">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-2 text-sm bg-red-900/30 text-red-300 rounded-lg">
+                    {error}
+                  </div>
+                )}
+                
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                    Descrição
+                  </label>
+                  <input
+                    type="text"
+                    id="description"
+                    placeholder="Ex: Salário, Mercado, etc."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
+                    Valor
+                  </label>
+                  <input
+                    type="number"
+                    id="amount"
+                    placeholder="0,00"
+                    min="0.01"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+                    Data
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <span className="block text-sm font-medium text-gray-300 mb-2">Tipo</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setType('income')}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
+                        type === 'income'
+                          ? 'bg-emerald-900/40 text-emerald-300 border-2 border-emerald-500'
+                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                      }`}
+                    >
+                      Receita
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setType('expense')}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
+                        type === 'expense'
+                          ? 'bg-red-900/40 text-red-300 border-2 border-red-500'
+                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                      }`}
+                    >
+                      Despesa
+                    </button>
+                  </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2"
+                >
+                  <PlusCircle className="w-5 h-5" />
+                  <span>Adicionar Transação</span>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-        
-        <button
-          type="submit"
-          className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2"
-        >
-          <PlusCircle className="w-5 h-5" />
-          <span>Adicionar Transação</span>
-        </button>
-      </form>
-    </section>
+      )}
+
+      {/* Modal de confirmação */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-[60] flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-xl w-full max-w-sm p-6 animate-fadeInUp">
+            <div className="flex items-start space-x-4">
+              <div className="bg-yellow-900/30 p-3 rounded-full">
+                <AlertCircle className="w-6 h-6 text-yellow-500" />
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-2">Descartar alterações?</h3>
+                <p className="text-gray-400 mb-4">
+                  Tem certeza que deseja fechar? Os dados não salvos serão perdidos.
+                </p>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={cancelClose}
+                    className="flex-1 py-2 px-4 border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-colors"
+                  >
+                    Não
+                  </button>
+                  <button
+                    onClick={confirmClose}
+                    className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <span>Sim</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
