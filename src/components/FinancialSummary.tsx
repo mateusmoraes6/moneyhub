@@ -19,7 +19,7 @@ const FinancialSummary: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-sm p-4 md:p-6 transition-all duration-300">
+      <section className="w-full dark:bg-gray-900 rounded-xl shadow-sm p-4 md:p-6 transition-all duration-300">
         <div className="animate-pulse space-y-6">
           <div className="text-center">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mx-auto mb-3"></div>

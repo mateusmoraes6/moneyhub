@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
       <Header />
       
-      <main className="container mx-auto px-4 py-6 max-w-3xl">
+      <main className="container mt-12 pt-16 mx-auto px-4 py-6 max-w-3xl">
         <div className="space-y-6">
           <FinancialSummary />
           
