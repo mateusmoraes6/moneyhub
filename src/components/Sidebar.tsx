@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wallet, X, LogIn, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -30,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
             {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 h-full w-64 bg-gray-900 shadow-lg transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed left-0 top-0 h-full w-64 bg-gray-900 shadow-lg flex flex-col justify-between transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 role="navigation"
                 aria-label="Menu lateral"
@@ -42,15 +43,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                 >
                     <X className="w-6 h-6 text-white" />
                 </button>
-                <div className="flex flex-col items-center mt-12">
-                    <div className="bg-emerald-500 rounded-full p-3 mb-2">
-                        <Wallet className="h-8 w-8 text-white" />
+                <div>
+                    <div className="flex flex-col items-center mt-12">
+                        <div className="bg-emerald-500 rounded-full p-3 mb-2">
+                            <Wallet className="h-8 w-8 text-white" />
+                        </div>
+                        <span className="text-white text-lg font-bold mb-8">MoneyHub</span>
+                        <Link
+                            to="/wallet"
+                            className="w-full text-left px-6 py-3 text-emerald-400 hover:text-emerald-300 font-medium transition block"
+                            onClick={onClose}
+                        >
+                            Carteiras
+                        </Link>
                     </div>
-                    <span className="text-white text-lg font-bold mb-8">MoneyHub</span>
+                </div>
+                <div className="mb-8 px-6">
                     {isAuthenticated ? (
                         <button
                             onClick={onLogout}
-                            className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                            className="flex items-center space-x-2 w-full px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
                         >
                             <LogOut className="w-4 h-4" />
                             <span>Sair</span>
@@ -58,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     ) : (
                         <button
                             onClick={onLogin}
-                            className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+                            className="flex items-center space-x-2 w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
                         >
                             <LogIn className="w-4 h-4" />
                             <span>Entrar</span>

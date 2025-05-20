@@ -5,6 +5,7 @@ import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
+import Wallet from './pages/Wallet';
 
 function App() {
   return (
@@ -19,6 +20,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/wallet"
+              element={
+                <PrivateRoute>
+                  <Wallet />
                 </PrivateRoute>
               }
             />

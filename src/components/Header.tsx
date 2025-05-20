@@ -4,6 +4,7 @@ import { useTransactions } from '../context/TransactionsContext';
 import { supabase } from '../supabaseClient';
 import AuthModal from './AuthModal';
 import Sidebar from './Sidebar';
+import { Link } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const { isAuthenticated } = useTransactions();
@@ -30,14 +31,26 @@ const Header: React.FC = () => {
           </button>
 
           {/* Desktop: Logo + Nome */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-4"></div>
+          {/* Esquerda: Logo + Nome */}
+          <div className="flex items-center space-x-2">
             <div className="bg-emerald-500 rounded-full p-2">
               <Wallet className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-xl font-semibold text-white">MoneyHub</h1>
+            {/* <h1 className="text-xl font-semibold text-white">MoneyHub</h1> */}
           </div>
 
-          {/* Desktop: Botão de login/logout */}
+          {/* Centro: Navegação */}
+          <div className="hidden md:flex flex-1 justify-center">
+            <Link
+              to="/wallet"
+              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
+            >
+              Carteiras
+            </Link>
+          </div>
+
+          {/* Direita: Login/Logout */}
           <div className="hidden md:block">
             {isAuthenticated ? (
               <button
