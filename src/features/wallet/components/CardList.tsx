@@ -1,5 +1,5 @@
 import React from 'react';
-import CreditCardCard from './CreditCardCard';
+import CreditCardCard from './CardItem';
 
 interface Card {
   id: number;

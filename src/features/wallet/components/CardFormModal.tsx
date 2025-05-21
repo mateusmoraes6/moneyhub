@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CardBankSelector from './CardBankSelector';
 
 interface CardFormValues {
   nome_banco: string;
@@ -14,6 +15,7 @@ interface CreditCardFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (values: CardFormValues) => void;
+  initialValues?: CardFormValues;
 }
 
 const bancos = [
@@ -23,8 +25,8 @@ const bancos = [
   // Adicione mais bancos conforme desejar
 ];
 
-const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClose, onSave }) => {
-  const [form, setForm] = useState<CardFormValues>({
+const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClose, onSave, initialValues }) => {
+  const [form, setForm] = useState<CardFormValues>(initialValues || {
     nome_banco: '',
     icone_url: '',
     apelido: '',
@@ -84,23 +86,11 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
 
         <div className="mb-4">
           <label className="block text-gray-300 mb-1">Banco</label>
-          <div className="flex gap-2">
-            {bancos.map(bank => (
-              <button
-                type="button"
-                key={bank.nome}
-                className={`p-2 rounded-lg border transition flex flex-col items-center ${
-                  form.nome_banco === bank.nome
-                    ? 'border-emerald-500 bg-emerald-900/20'
-                    : 'border-gray-700'
-                }`}
-                onClick={() => handleSelectBank(bank)}
-              >
-                <img src={bank.icone} alt={bank.nome} className="w-8 h-8 mb-1" />
-                <span className="text-xs text-gray-200">{bank.nome}</span>
-              </button>
-            ))}
-          </div>
+          <CardBankSelector
+            bancos={bancos}
+            selected={form.nome_banco}
+            onSelect={handleSelectBank}
+          />
         </div>
 
         <div className="mb-3">

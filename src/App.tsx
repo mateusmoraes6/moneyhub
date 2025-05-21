@@ -5,7 +5,7 @@ import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
-import Wallet from './pages/Wallet';
+import Wallet from './features/pages/Wallet';
 
 function App() {
   return (

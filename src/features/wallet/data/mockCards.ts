@@ -1,4 +1,6 @@
-export const mockCards = [
+import { Card } from '../types';
+
+export const mockCards: Card[] = [
   {
     id: 1,
     nome_banco: 'Nubank',

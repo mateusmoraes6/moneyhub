@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import CreditCardList from '../components/CreditCardList';
-import CreditCardFormModal from '../components/CreditCardFormModal';
-import { mockCards } from '../data/mockCards';
+import CreditCardList from '../wallet/components/CardList';
+import CreditCardFormModal from '../wallet/components/CardFormModal';
+import { mockCards } from '../wallet/data/mockCards';
 import { useNavigate } from 'react-router-dom';
 
 interface Card {
