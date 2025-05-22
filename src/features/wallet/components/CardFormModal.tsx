@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import CardBankSelector from './CardBankSelector';
+import React, { useState, useRef, useEffect } from 'react';
+import { IMaskInput } from 'react-imask';
 
 interface CardFormValues {
   nome_banco: string;
@@ -7,8 +7,8 @@ interface CardFormValues {
   apelido: string;
   limite_total: number;
   limite_disponivel: number;
-  data_fechamento: number;
-  data_vencimento: number;
+  data_fechamento: number | undefined;
+  data_vencimento: number | undefined;
 }
 
 interface CreditCardFormModalProps {
@@ -32,15 +32,35 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
     apelido: '',
     limite_total: 0,
     limite_disponivel: 0,
-    data_fechamento: 1,
-    data_vencimento: 1,
+    data_fechamento: undefined,
+    data_vencimento: undefined,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const [showBankSelector, setShowBankSelector] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  // Foco automático no primeiro campo
+  useEffect(() => {
+    if (isOpen && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type } = e.target;
+
     setForm(prev => ({
       ...prev,
-      [name]: name.includes('limite') || name.includes('data') ? Number(value) : value,
+      [name]: type === 'number' ? (value === '' ? undefined : Number(value)) : value,
+    }));
+  };
+
+  const handleCurrencyChange = (name: string, value: string) => {
+    const numericValue = Number(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    setForm(prev => ({
+      ...prev,
+      [name]: numericValue,
     }));
   };
 
@@ -50,11 +70,25 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
       nome_banco: bank.nome,
       icone_url: bank.icone,
     }));
+    setShowBankSelector(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+    if (!form.nome_banco || !form.apelido || form.limite_total === undefined || form.limite_disponivel === undefined || form.data_fechamento === undefined || form.data_vencimento === undefined) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+    }
+    
+    const valuesToSave = {
+        ...form,
+        limite_total: form.limite_total ?? 0,
+        limite_disponivel: form.limite_disponivel ?? 0,
+        data_fechamento: form.data_fechamento ?? 1,
+        data_vencimento: form.data_vencimento ?? 1,
+    };
+
+    onSave(valuesToSave as CardFormValues);
     onClose();
     setForm({
       nome_banco: '',
@@ -62,109 +96,202 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
       apelido: '',
       limite_total: 0,
       limite_disponivel: 0,
-      data_fechamento: 1,
-      data_vencimento: 1,
+      data_fechamento: undefined,
+      data_vencimento: undefined,
     });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-60">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-60 p-4">
+      <div 
+        ref={modalRef}
+        className="bg-gray-900 rounded-xl w-full max-w-[90vw] md:max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto"
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
-        >
-          ✕
-        </button>
-        <h2 className="text-xl font-bold text-white mb-4">Adicionar Cartão</h2>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-white">Adicionar Cartão</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-400 hover:text-white p-2"
+              aria-label="Fechar modal"
+            >
+              ✕
+            </button>
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-1">Banco</label>
-          <CardBankSelector
-            bancos={bancos}
-            selected={form.nome_banco}
-            onSelect={handleSelectBank}
-          />
-        </div>
+          {/* Seletor de Banco */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Banco <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowBankSelector(!showBankSelector)}
+                className={`w-full p-4 bg-gray-800 border rounded-lg text-left flex items-center justify-between
+                  ${form.nome_banco ? 'border-green-500' : 'border-gray-700'}`}
+              >
+                {form.nome_banco ? (
+                  <div className="flex items-center gap-3">
+                    <img src={form.icone_url} alt={form.nome_banco} className="w-6 h-6" />
+                    <span className="font-medium text-white">{form.nome_banco}</span>
+                  </div>
+                ) : (
+                  <span className="text-gray-400">Ex.: Nubank, Itaú, BB...</span>
+                )}
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-        <div className="mb-3">
-          <label className="block text-gray-300 mb-1">Apelido</label>
-          <input
-            type="text"
-            name="apelido"
-            value={form.apelido}
-            onChange={handleChange}
-            className="w-full rounded-lg bg-gray-800 text-white p-2"
-            required
-          />
-        </div>
-        <div className="mb-3 flex gap-2">
-          <div className="flex-1">
-            <label className="block text-gray-300 mb-1">Limite Total</label>
+              {showBankSelector && (
+                <div className="absolute z-10 w-full mt-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+                  <div className="p-2 space-y-2">
+                    {bancos.map((bank) => (
+                      <button
+                        key={bank.nome}
+                        type="button"
+                        onClick={() => handleSelectBank(bank)}
+                        className="w-full p-3 flex items-center gap-3 hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <img src={bank.icone} alt={bank.nome} className="w-6 h-6" />
+                        <span className="font-medium text-white">{bank.nome}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Campo Apelido */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Apelido <span className="text-red-500">*</span>
+            </label>
             <input
-              type="number"
-              name="limite_total"
-              value={form.limite_total}
+              ref={firstInputRef}
+              type="text"
+              name="apelido"
+              value={form.apelido}
               onChange={handleChange}
-              className="w-full rounded-lg bg-gray-800 text-white p-2"
-              min={0}
+              placeholder="Ex.: Cartão Principal, Cartão de Viagem..."
+              className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
               required
             />
           </div>
-          <div className="flex-1">
-            <label className="block text-gray-300 mb-1">Limite Disponível</label>
-            <input
-              type="number"
-              name="limite_disponivel"
-              value={form.limite_disponivel}
-              onChange={handleChange}
-              className="w-full rounded-lg bg-gray-800 text-white p-2"
-              min={0}
-              required
-            />
+
+          {/* Campos de Limite */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Limite Total <span className="text-red-500">*</span>
+              </label>
+              <IMaskInput
+                mask="R$ num"
+                blocks={{
+                  num: {
+                    mask: Number,
+                    thousandsSeparator: '.',
+                    radix: ',',
+                    scale: 2,
+                    padFractionalZeros: true,
+                    normalizeZeros: true,
+                    min: 0
+                  }
+                }}
+                value={form.limite_total.toString()}
+                onAccept={(value) => handleCurrencyChange('limite_total', value)}
+                placeholder="R$ 0,00"
+                className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Limite Disponível <span className="text-red-500">*</span>
+              </label>
+              <IMaskInput
+                mask="R$ num"
+                blocks={{
+                  num: {
+                    mask: Number,
+                    thousandsSeparator: '.',
+                    radix: ',',
+                    scale: 2,
+                    padFractionalZeros: true,
+                    normalizeZeros: true,
+                    min: 0
+                  }
+                }}
+                value={form.limite_disponivel.toString()}
+                onAccept={(value) => handleCurrencyChange('limite_disponivel', value)}
+                placeholder="R$ 0,00"
+                className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
           </div>
-        </div>
-        <div className="mb-3 flex gap-2">
-          <div className="flex-1">
-            <label className="block text-gray-300 mb-1">Dia Fechamento</label>
-            <input
-              type="number"
-              name="data_fechamento"
-              value={form.data_fechamento}
-              onChange={handleChange}
-              className="w-full rounded-lg bg-gray-800 text-white p-2"
-              min={1}
-              max={31}
-              required
-            />
+
+          {/* Campos de Data */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Dia de Fechamento <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="data_fechamento"
+                value={form.data_fechamento === undefined ? '' : form.data_fechamento}
+                onChange={handleChange}
+                min={1}
+                max={31}
+                placeholder="1 a 31"
+                className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Dia de Vencimento <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="data_vencimento"
+                value={form.data_vencimento === undefined ? '' : form.data_vencimento}
+                onChange={handleChange}
+                min={1}
+                max={31}
+                placeholder="1 a 31"
+                className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="block text-gray-300 mb-1">Dia Vencimento</label>
-            <input
-              type="number"
-              name="data_vencimento"
-              value={form.data_vencimento}
-              onChange={handleChange}
-              className="w-full rounded-lg bg-gray-800 text-white p-2"
-              min={1}
-              max={31}
-              required
-            />
+
+          {/* Botões de Ação */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="w-full sm:w-auto px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Salvar Cartão
+            </button>
           </div>
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-medium mt-4 transition"
-        >
-          Salvar Cartão
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

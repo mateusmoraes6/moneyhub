@@ -14,5 +14,4 @@ export interface Bank {
   icone: string;
 }
 
-export interface CardFormValues
-  extends Omit<Card, 'id'> {} // Para formulário, sem o id
+export type CardFormValues = Omit<Card, 'id'>;
