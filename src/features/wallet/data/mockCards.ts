@@ -21,4 +21,14 @@ export const mockCards: Card[] = [
     data_fechamento: 5,
     data_vencimento: 12,
   },
+  {
+    id: 3,
+    nome_banco: 'C6 Bank',
+    icone_url: '/icons/c6bank.svg',
+    apelido: 'Platinum',
+    limite_total: 5000,
+    limite_disponivel: 500,
+    data_fechamento: 5,
+    data_vencimento: 12,
+  },
 ];
