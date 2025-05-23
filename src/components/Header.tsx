@@ -41,12 +41,18 @@ const Header: React.FC = () => {
           </div>
 
           {/* Centro: Navegação */}
-          <div className="hidden md:flex flex-1 justify-center">
+          <div className="hidden md:flex flex-1 justify-center space-x-6">
             <Link
               to="/wallet"
               className="text-emerald-400 hover:text-emerald-300 font-medium transition"
             >
-              Carteiras
+              Cartões de Crédito
+            </Link>
+            <Link
+              to="/bank-accounts"
+              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
+            >
+              Contas Bancárias
             </Link>
           </div>
 

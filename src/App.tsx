@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
 import Wallet from './features/pages/Wallet';
+import BankAccounts from './features/pages/BankAccounts';
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Wallet />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/bank-accounts"
+              element={
+                <PrivateRoute>
+                  <BankAccounts />
                 </PrivateRoute>
               }
             />

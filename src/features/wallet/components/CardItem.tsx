@@ -30,7 +30,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
         <img 
           src={card.icone_url} 
           alt={card.nome_banco} 
-          className="w-10 h-10 rounded-full bg-white p-0.5"
+          className="w-10 h-10 rounded-lg bg-white p-0.5"
         />
         <div>
           <h3 className="text-lg font-semibold text-white">{card.apelido}</h3>

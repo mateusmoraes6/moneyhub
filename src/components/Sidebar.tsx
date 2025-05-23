@@ -54,7 +54,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                             className="w-full text-left px-6 py-3 text-emerald-400 hover:text-emerald-300 font-medium transition block"
                             onClick={onClose}
                         >
-                            Carteiras
+                            Cartões de Crédito
+                        </Link>
+                        <Link
+                            to="/bank-accounts"
+                            className="w-full text-left px-6 py-3 text-emerald-400 hover:text-emerald-300 font-medium transition block"
+                            onClick={onClose}
+                        >
+                            Contas Bancárias
                         </Link>
                     </div>
                 </div>
