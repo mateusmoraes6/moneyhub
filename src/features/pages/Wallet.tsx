@@ -15,23 +15,60 @@ interface Card {
   data_vencimento: number;
 }
 
+interface CardFormValues {
+  nome_banco: string;
+  icone_url: string;
+  apelido: string;
+  limite_total: number;
+  limite_disponivel: number;
+  data_fechamento?: number;
+  data_vencimento?: number;
+}
+
 const Wallet: React.FC = () => {
   const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>(mockCards);
   const [showModal, setShowModal] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Funções de adicionar, editar, excluir (mockadas)
-  const handleAdd = () => setShowModal(true);
-  const handleEdit = (card: Card) => {/* abrir modal futuramente */};
+  // Funções de adicionar, editar, excluir
+  const handleAdd = () => {
+    setIsEditing(false);
+    setSelectedCard(null);
+    setShowModal(true);
+  };
+
+  const handleEdit = (card: Card) => {
+    setSelectedCard(card);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
   const handleDelete = (card: Card) => setCards(cards.filter(c => c.id !== card.id));
   const handleSelect = (card: Card) => {/* mostrar transações do cartão futuramente */};
 
-  // Função para adicionar novo cartão (mock)
-  const handleSave = (newCard: any) => {
-    setCards(prev => [
-      ...prev,
-      { ...newCard, id: Date.now() }
-    ]);
+  // Função para salvar cartão (novo ou editado)
+  const handleSave = (newCard: CardFormValues) => {
+    const cardToSave = {
+      ...newCard,
+      data_fechamento: newCard.data_fechamento ?? 1,
+      data_vencimento: newCard.data_vencimento ?? 1,
+    };
+
+    if (isEditing && selectedCard) {
+      setCards(prev => prev.map(card => 
+        card.id === selectedCard.id ? { ...cardToSave, id: card.id } : card
+      ));
+    } else {
+      setCards(prev => [
+        ...prev,
+        { ...cardToSave, id: Date.now() }
+      ]);
+    }
+    setShowModal(false);
+    setIsEditing(false);
+    setSelectedCard(null);
   };
 
   return (
@@ -62,8 +99,13 @@ const Wallet: React.FC = () => {
       />
       <CreditCardFormModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setIsEditing(false);
+          setSelectedCard(null);
+        }}
         onSave={handleSave}
+        initialValues={isEditing && selectedCard ? selectedCard : undefined}
       />
     </div>
   );

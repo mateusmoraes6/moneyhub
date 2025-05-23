@@ -26,7 +26,7 @@ const bancos = [
   { nome: 'Santander', icone: '/icons/santander.svg' },
   { nome: 'Bradesco', icone: '/icons/bradesco.svg' },
   { nome: 'Inter', icone: '/icons/inter.svg' },
-  
+  { nome: 'Caixa', icone: '/icons/caixa.svg' },
 ];
 
 const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClose, onSave, initialValues }) => {
@@ -50,6 +50,13 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
       firstInputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Atualiza o formulário quando initialValues mudar
+  useEffect(() => {
+    if (initialValues) {
+      setForm(initialValues);
+    }
+  }, [initialValues]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
@@ -115,7 +122,9 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
       >
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">Adicionar Cartão</h2>
+            <h2 className="text-xl font-semibold text-white">
+              {initialValues ? 'Editar Cartão' : 'Adicionar Cartão'}
+            </h2>
             <button
               type="button"
               onClick={onClose}
@@ -291,7 +300,7 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               type="submit"
               className="w-full sm:w-auto px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
             >
-              Salvar Cartão
+              {initialValues ? 'Salvar Alterações' : 'Adicionar Cartão'}
             </button>
           </div>
         </form>

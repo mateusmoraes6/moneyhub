@@ -8,4 +8,5 @@ export const banks: Bank[] = [
   { nome: 'Santander', icone: '/icons/santander.svg' },
   { nome: 'Bradesco', icone: '/icons/bradesco.svg' },
   { nome: 'Inter', icone: '/icons/inter.svg' },
+  { nome: 'Caixa', icone: '/icons/caixa.svg' },
 ];
