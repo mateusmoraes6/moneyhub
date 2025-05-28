@@ -43,6 +43,12 @@ const Header: React.FC = () => {
           {/* Centro: Navegação */}
           <div className="hidden md:flex flex-1 justify-center space-x-6">
             <Link
+              to="/"
+              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
+            >
+              Visão Geral
+            </Link>
+            <Link
               to="/wallet"
               className="text-emerald-400 hover:text-emerald-300 font-medium transition"
             >

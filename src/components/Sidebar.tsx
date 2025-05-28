@@ -50,6 +50,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                         </div>
                         <span className="text-white text-lg font-bold mb-8">MoneyHub</span>
                         <Link
+                            to="/"
+                            className="w-full text-left px-6 py-3 text-emerald-400 hover:text-emerald-300 font-medium transition block"
+                            onClick={onClose}
+                        >
+                            Visão Geral
+                        </Link>
+                        <Link
                             to="/wallet"
                             className="w-full text-left px-6 py-3 text-emerald-400 hover:text-emerald-300 font-medium transition block"
                             onClick={onClose}
