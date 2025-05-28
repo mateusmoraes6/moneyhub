@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, LogIn, X, AlertCircle } from 'lucide-react';
 import { useTransactions } from '../context/TransactionsContext';
-import { TransactionType } from '../types';
+import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../types';
+import { IMaskInput } from 'react-imask';
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
@@ -15,6 +16,11 @@ const TransactionForm: React.FC = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix_debit');
+  const [category, setCategory] = useState('');
+  const [accountId, setAccountId] = useState<number>();
+  const [cardId, setCardId] = useState<number>();
+  const [installments, setInstallments] = useState<number>(1);
 
   const resetForm = () => {
     setDescription('');
@@ -22,6 +28,11 @@ const TransactionForm: React.FC = () => {
     setType('income');
     setDate(new Date().toISOString().split('T')[0]);
     setError(null);
+    setPaymentMethod('pix_debit');
+    setCategory('');
+    setAccountId(undefined);
+    setCardId(undefined);
+    setInstallments(1);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,15 +55,34 @@ const TransactionForm: React.FC = () => {
       return;
     }
     
+    if (!category) {
+      setError('Por favor, selecione uma categoria');
+      return;
+    }
+
+    if (paymentMethod === 'pix_debit' && !accountId) {
+      setError('Por favor, selecione uma conta');
+      return;
+    }
+
+    if (paymentMethod === 'credit' && !cardId) {
+      setError('Por favor, selecione um cartão');
+      return;
+    }
+    
     // Add transaction
     addTransaction({
       description: description.trim(),
       amount: amountValue,
       type,
-      date: date, 
+      date,
+      payment_method: paymentMethod,
+      category,
+      account_id: accountId,
+      card_id: cardId,
+      installments: paymentMethod === 'credit' ? installments : undefined,
     });
     
-    // Reset form and close modal
     resetForm();
     setIsModalOpen(false);
   };
@@ -224,6 +254,114 @@ const TransactionForm: React.FC = () => {
                   </div>
                 </div>
                 
+                {/* Categoria */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Categoria
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {(type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Método de Pagamento */}
+                <div>
+                  <span className="block text-sm font-medium text-gray-300 mb-2">Método de Pagamento</span>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod('pix_debit');
+                        setCardId(undefined);
+                        setInstallments(1);
+                      }}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
+                        paymentMethod === 'pix_debit'
+                          ? 'bg-blue-900/40 text-blue-300 border-2 border-blue-500'
+                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                      }`}
+                    >
+                      Pix/Débito
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMethod('credit');
+                        setAccountId(undefined);
+                      }}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
+                        paymentMethod === 'credit'
+                          ? 'bg-purple-900/40 text-purple-300 border-2 border-purple-500'
+                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                      }`}
+                    >
+                      Crédito
+                    </button>
+                  </div>
+
+                  {/* Seleção de Conta/Cartão */}
+                  {paymentMethod === 'pix_debit' ? (
+                    <select
+                      value={accountId}
+                      onChange={(e) => setAccountId(Number(e.target.value))}
+                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                    >
+                      <option value="">Selecione uma conta</option>
+                      {/* Adicionar lista de contas aqui */}
+                    </select>
+                  ) : (
+                    <select
+                      value={cardId}
+                      onChange={(e) => setCardId(Number(e.target.value))}
+                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                    >
+                      <option value="">Selecione um cartão</option>
+                      {/* Adicionar lista de cartões aqui */}
+                    </select>
+                  )}
+                </div>
+
+                {/* Parcelas (apenas para crédito) */}
+                {paymentMethod === 'credit' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                      Parcelas
+                    </label>
+                    <select
+                      value={installments}
+                      onChange={(e) => setInstallments(Number(e.target.value))}
+                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
+                        <option key={num} value={num}>
+                          {num}x {num === 1 ? '(à vista)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    
+                    {/* Resumo do parcelamento */}
+                    {installments > 1 && (
+                      <div className="mt-2 p-3 bg-gray-800 rounded-lg">
+                        <p className="text-sm text-gray-400">
+                          Total: R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          {installments}x de R$ {(parseFloat(amount) / installments).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   className="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center space-x-2"
