@@ -5,7 +5,7 @@ export const mockCards: Card[] = [
     id: 1,
     nome_banco: 'Nubank',
     icone_url: '/icons/nubank.svg',
-    apelido: 'Roxo',
+    apelido: 'Poupança',
     limite_total: 5000,
     limite_disponivel: 3200,
     data_fechamento: 10,
