@@ -19,6 +19,18 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
     }).format(value);
   };
 
+  // Calculate monthly growth value based on the last two historical balances
+  const calculateMonthlyGrowthValue = (history: { data: string; valor: number }[] | undefined) => {
+    if (!history || history.length < 2) return null;
+    const sortedHistory = [...history].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+    const latestBalance = sortedHistory[sortedHistory.length - 1].valor;
+    const previousBalance = sortedHistory[sortedHistory.length - 2].valor;
+    return latestBalance - previousBalance;
+  };
+
+  const monthlyGrowthValue = calculateMonthlyGrowthValue(account.historico_saldo);
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-lg p-4 w-full max-w-xl max-h-[90vh] overflow-y-auto">
@@ -59,17 +71,19 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
           <div className="bg-gray-800 rounded-lg p-3">
             <h3 className="text-lg font-medium text-white mb-3">Saúde Financeira</h3>
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
-                <span className="text-gray-400">Crescimento Mensal</span>
-                <span className="ml-auto text-emerald-400">+5.2%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-400" />
-                <span className="text-gray-400">Meta de Saldo</span>
-                <span className="ml-auto text-blue-400">
-                  {formatCurrency(account.meta_saldo || 0)}
-                </span>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                   <TrendingUp className="w-5 h-5 text-emerald-400" />
+                   <span className="text-gray-400">Crescimento Mensal</span>
+                   <span className="ml-auto text-emerald-400">+5.2%</span>
+                </div>
+                {monthlyGrowthValue !== null && (
+                  <div className="flex justify-end">
+                    <span className={`${monthlyGrowthValue >= 0 ? 'text-emerald-400' : 'text-red-400'} text-sm`}>
+                       {formatCurrency(monthlyGrowthValue)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -124,27 +138,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Categorias de Gastos */}
-          <div className="bg-gray-800 rounded-lg p-4 md:col-span-2">
-            <h3 className="text-lg font-medium text-white mb-4">Gastos por Categoria</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {account.categorias_gastos?.map((categoria, index) => (
-                <div key={index} className="bg-gray-700 rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <PieChart className="w-4 h-4 text-emerald-400" />
-                    <span className="text-white text-sm">{categoria.nome}</span>
-                  </div>
-                  <p className="text-emerald-400 font-semibold">
-                    {formatCurrency(categoria.valor)}
-                  </p>
-                  <p className="text-gray-400 text-xs">
-                    {categoria.percentual}% do total
-                  </p>
-                </div>
-              ))}
             </div>
           </div>
 

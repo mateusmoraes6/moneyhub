@@ -24,13 +24,6 @@ const BankAccounts: React.FC = () => {
     }).format(value);
   };
 
-  const getAccountHealth = (_saldo: number, receitas: number, despesas: number) => {
-    const ratio = despesas / receitas;
-    if (ratio < 0.7) return { color: 'text-emerald-400', icon: TrendingUp, label: 'Excelente' };
-    if (ratio < 0.9) return { color: 'text-yellow-400', icon: TrendingUp, label: 'Bom' };
-    return { color: 'text-red-400', icon: TrendingDown, label: 'Atenção' };
-  };
-
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
       <Header />
@@ -62,38 +55,30 @@ const BankAccounts: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accounts.map((account) => {
-              const health = getAccountHealth(
-                account.saldo,
-                account.receitas_mes || 0,
-                account.despesas_mes || 0
-              );
-              const HealthIcon = health.icon;
-
               return (
                 <div key={account.id} className="bg-gray-900 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-4">
-                      <img 
-                        src={account.icone_url} 
+                      <img
+                        src={account.icone_url}
                         alt={account.nome_banco}
                         className="w-12 h-12 rounded-lg bg-white p-0.5"
                       />
                       <div>
                         <h3 className="text-lg font-semibold text-white">{account.nome_banco}</h3>
-                        <p className="text-gray-400">{account.apelido}</p>
-                        <p className="text-sm text-gray-500">
-                          {account.tipo_conta.charAt(0).toUpperCase() + account.tipo_conta.slice(1)}
-                        </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => {/* Implementar edição */}}
+                    <div className="flex flex-col items-center space-y-2">
+                      <button
+                        onClick={() => {
+                          setSelectedAccount(account);
+                          setIsModalOpen(true);
+                        }}
                         className="p-2 text-gray-400 hover:text-emerald-400 transition-colors"
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(account)}
                         className="p-2 text-gray-400 hover:text-red-400 transition-colors"
                       >
@@ -105,17 +90,13 @@ const BankAccounts: React.FC = () => {
                     <div className="flex justify-between items-center mb-2">
                       <div>
                         <p className="text-sm text-gray-400">Saldo atual</p>
-                        <p className={`text-2xl font-bold ${health.color}`}>
+                        <p className={`text-2xl font-bold ${account.saldo >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {formatCurrency(account.saldo)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <HealthIcon className={`w-5 h-5 ${health.color}`} />
-                        <span className={`text-sm ${health.color}`}>{health.label}</span>
-                      </div>
                     </div>
 
-                    <div className="mt-4 h-24">
+                    <div className="mt-4 h-32">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={account.historico_saldo || []}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -123,6 +104,10 @@ const BankAccounts: React.FC = () => {
                             dataKey="data"
                             stroke="#9CA3AF"
                             tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                            tickFormatter={(tickItem) => {
+                              const [year, month] = tickItem.split('-');
+                              return `${month} - ${year.slice(2)}`;
+                            }}
                           />
                           <YAxis
                              stroke="#9CA3AF"
@@ -165,12 +150,8 @@ const BankAccounts: React.FC = () => {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Info className="w-4 h-4" />
-                        <span>Última atualização: Hoje</span>
-                      </div>
-                      <button 
+                    <div className="mt-4 flex items-center justify-center text-sm">
+                      <button
                         onClick={() => {
                           setSelectedAccount(account);
                           setIsModalOpen(true);
