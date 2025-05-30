@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { BankAccount, mockAccounts } from '../wallet/data/mockAccounts';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AccountDetailsModal from '../../components/AccountDetailsModal';
+import AddAccountModal from '../../components/AddAccountModal';
 
 const BankAccounts: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const BankAccounts: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleDelete = (account: BankAccount) => {
     setAccounts(accounts.filter(a => a.id !== account.id));
@@ -22,6 +24,14 @@ const BankAccounts: React.FC = () => {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  };
+
+  const handleAddAccount = (newAccount: Omit<BankAccount, 'id'>) => {
+    const account: BankAccount = {
+      ...newAccount,
+      id: Date.now().toString(), // Gera um ID único
+    };
+    setAccounts([...accounts, account]);
   };
 
   return (
@@ -47,7 +57,10 @@ const BankAccounts: React.FC = () => {
               </div>
               <h1 className="text-2xl font-semibold text-white">Contas Bancárias</h1>
             </div>
-            <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+            <button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
+            >
               <Plus className="w-5 h-5" />
               Adicionar Conta
             </button>
@@ -175,6 +188,12 @@ const BankAccounts: React.FC = () => {
             account={selectedAccount}
           />
         )}
+
+        <AddAccountModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSave={handleAddAccount}
+        />
       </main>
     </div>
   );
