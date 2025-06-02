@@ -14,6 +14,8 @@ export interface Transaction {
   account_id?: number;
   card_id?: number;
   installments?: number;
+  status: 'pending' | 'paid' | 'overdue';
+  due_date?: string;
 }
 
 export type EditableTransactionFields = Omit<Transaction, 'id' | 'created_at' | 'user_id'>;
@@ -58,3 +60,35 @@ export const EXPENSE_CATEGORIES: Category[] = [
   { id: 'bills', name: 'Contas', icon: '📄', type: 'expense' },
   { id: 'other_expense', name: 'Outros', icon: '📝', type: 'expense' },
 ];
+
+export interface Account {
+  id: number;
+  name: string;
+  bank: string;
+  balance: number;
+  type: 'checking' | 'savings';
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Card {
+  id: number;
+  name: string;
+  bank: string;
+  limit: number;
+  available_limit: number;
+  closing_day: number;
+  due_day: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface AccountsContextType {
+  accounts: Account[];
+  cards: Card[];
+  addAccount: (account: Omit<Account, 'id' | 'created_at'>) => Promise<void>;
+  addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;
+  updateCardLimit: (cardId: number, amount: number) => Promise<void>;
+  getAccountById: (id: number) => Account | undefined;
+  getCardById: (id: number) => Card | undefined;
+}

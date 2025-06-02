@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, LogIn, X, AlertCircle } from 'lucide-react';
 import { useTransactions } from '../context/TransactionsContext';
+import { useAccounts } from '../context/AccountsContext';
 import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../types';
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
+  const { accounts, cards, updateCardLimit } = useAccounts();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [description, setDescription] = useState('');
@@ -34,7 +36,16 @@ const TransactionForm: React.FC = () => {
     setInstallments(1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (paymentMethod === 'pix_debit') {
+      setCardId(undefined);
+      setInstallments(1);
+    } else {
+      setAccountId(undefined);
+    }
+  }, [paymentMethod]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -59,31 +70,56 @@ const TransactionForm: React.FC = () => {
       return;
     }
 
+    // Validações específicas para cartão de crédito
+    if (paymentMethod === 'credit') {
+      if (!cardId) {
+        setError('Por favor, selecione um cartão');
+        return;
+      }
+
+      const selectedCard = cards.find(card => card.id === cardId);
+      if (!selectedCard) {
+        setError('Cartão não encontrado');
+        return;
+      }
+
+      if (amountValue > selectedCard.available_limit) {
+        setError('Valor excede o limite disponível do cartão');
+        return;
+      }
+    }
+
+    // Validações para conta
     if (paymentMethod === 'pix_debit' && !accountId) {
       setError('Por favor, selecione uma conta');
       return;
     }
 
-    if (paymentMethod === 'credit' && !cardId) {
-      setError('Por favor, selecione um cartão');
-      return;
+    try {
+      // Add transaction
+      await addTransaction({
+        description: description.trim(),
+        amount: amountValue,
+        type,
+        date,
+        payment_method: paymentMethod,
+        category,
+        account_id: accountId,
+        card_id: cardId,
+        installments: paymentMethod === 'credit' ? installments : undefined,
+        status: 'pending',
+      });
+
+      // Atualizar limite do cartão se for transação de crédito
+      if (paymentMethod === 'credit' && cardId) {
+        await updateCardLimit(cardId, amountValue);
+      }
+
+      resetForm();
+      setIsModalOpen(false);
+    } catch (err) {
+      setError('Erro ao adicionar transação');
     }
-    
-    // Add transaction
-    addTransaction({
-      description: description.trim(),
-      amount: amountValue,
-      type,
-      date,
-      payment_method: paymentMethod,
-      category,
-      account_id: accountId,
-      card_id: cardId,
-      installments: paymentMethod === 'credit' ? installments : undefined,
-    });
-    
-    resetForm();
-    setIsModalOpen(false);
   };
 
   const openModal = () => {
@@ -274,15 +310,13 @@ const TransactionForm: React.FC = () => {
 
                 {/* Método de Pagamento */}
                 <div>
-                  <span className="block text-sm font-medium text-gray-300 mb-2">Método de Pagamento</span>
+                  <span className="block text-sm font-medium text-gray-300 mb-2">
+                    Método de Pagamento
+                  </span>
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <button
                       type="button"
-                      onClick={() => {
-                        setPaymentMethod('pix_debit');
-                        setCardId(undefined);
-                        setInstallments(1);
-                      }}
+                      onClick={() => setPaymentMethod('pix_debit')}
                       className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
                         paymentMethod === 'pix_debit'
                           ? 'bg-blue-900/40 text-blue-300 border-2 border-blue-500'
@@ -293,10 +327,7 @@ const TransactionForm: React.FC = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setPaymentMethod('credit');
-                        setAccountId(undefined);
-                      }}
+                      onClick={() => setPaymentMethod('credit')}
                       className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
                         paymentMethod === 'credit'
                           ? 'bg-purple-900/40 text-purple-300 border-2 border-purple-500'
@@ -315,51 +346,61 @@ const TransactionForm: React.FC = () => {
                       className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
                     >
                       <option value="">Selecione uma conta</option>
-                      {/* Adicionar lista de contas aqui */}
-                    </select>
-                  ) : (
-                    <select
-                      value={cardId}
-                      onChange={(e) => setCardId(Number(e.target.value))}
-                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                    >
-                      <option value="">Selecione um cartão</option>
-                      {/* Adicionar lista de cartões aqui */}
-                    </select>
-                  )}
-                </div>
-
-                {/* Parcelas (apenas para crédito) */}
-                {paymentMethod === 'credit' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Parcelas
-                    </label>
-                    <select
-                      value={installments}
-                      onChange={(e) => setInstallments(Number(e.target.value))}
-                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
-                        <option key={num} value={num}>
-                          {num}x {num === 1 ? '(à vista)' : ''}
+                      {accounts.map(account => (
+                        <option key={account.id} value={account.id}>
+                          {account.name} - {account.bank}
                         </option>
                       ))}
                     </select>
-                    
-                    {/* Resumo do parcelamento */}
-                    {installments > 1 && (
-                      <div className="mt-2 p-3 bg-gray-800 rounded-lg">
-                        <p className="text-sm text-gray-400">
-                          Total: R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          {installments}x de R$ {(parseFloat(amount) / installments).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      <select
+                        value={cardId}
+                        onChange={(e) => setCardId(Number(e.target.value))}
+                        className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                      >
+                        <option value="">Selecione um cartão</option>
+                        {cards.map(card => (
+                          <option key={card.id} value={card.id}>
+                            {card.name} - {card.bank}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Parcelas (apenas para crédito) */}
+                      {paymentMethod === 'credit' && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            Parcelas
+                          </label>
+                          <select
+                            value={installments}
+                            onChange={(e) => setInstallments(Number(e.target.value))}
+                            className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
+                          >
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
+                              <option key={num} value={num}>
+                                {num}x {num === 1 ? '(à vista)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                          
+                          {/* Resumo do parcelamento */}
+                          {amount && installments > 1 && (
+                            <div className="mt-2 p-3 bg-gray-800 rounded-lg">
+                              <p className="text-sm text-gray-400">
+                                Total: R$ {parseFloat(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-sm text-gray-400">
+                                {installments}x de R$ {(parseFloat(amount) / installments).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
 
                 <button
                   type="submit"
