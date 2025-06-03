@@ -1,11 +1,36 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Account, Card, AccountsContextType } from '../types';
+import { mockAccounts } from '../features/wallet/data/mockAccounts';
+import { mockCards } from '../features/wallet/data/mockCards';
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
 export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [cards, setCards] = useState<Card[]>([]);
+  // Converter os dados mockados para o formato esperado
+  const initialAccounts: Account[] = mockAccounts.map(account => ({
+    id: Number(account.id),
+    name: account.nome_banco,
+    bank: account.nome_banco,
+    balance: account.saldo,
+    type: 'checking',
+    is_active: true,
+    created_at: new Date().toISOString()
+  }));
+
+  const initialCards: Card[] = mockCards.map(card => ({
+    id: card.id,
+    name: card.apelido,
+    bank: card.nome_banco,
+    limit: card.limite_total,
+    available_limit: card.limite_disponivel,
+    closing_day: card.data_fechamento,
+    due_day: card.data_vencimento,
+    is_active: true,
+    created_at: new Date().toISOString()
+  }));
+
+  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
+  const [cards, setCards] = useState<Card[]>(initialCards);
 
   // Adicionar conta
   const addAccount = useCallback(async (accountData: Omit<Account, 'id' | 'created_at'>) => {

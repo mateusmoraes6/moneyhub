@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PlusCircle, LogIn, X, AlertCircle } from 'lucide-react';
 import { useTransactions } from '../context/TransactionsContext';
 import { useAccounts } from '../context/AccountsContext';
-import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../types';
+import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES, Card } from '../types';
+import AccountCardSelector from './AccountCardSelector';
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
@@ -19,8 +20,8 @@ const TransactionForm: React.FC = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix_debit');
   const [category, setCategory] = useState('');
-  const [accountId, setAccountId] = useState<number>();
-  const [cardId, setCardId] = useState<number>();
+  const [accountId, setAccountId] = useState<number | string | undefined>(undefined);
+  const [cardId, setCardId] = useState<number | string | undefined>(undefined);
   const [installments, setInstallments] = useState<number>(1);
 
   const resetForm = () => {
@@ -72,12 +73,12 @@ const TransactionForm: React.FC = () => {
 
     // Validações específicas para cartão de crédito
     if (paymentMethod === 'credit') {
-      if (!cardId) {
+      if (cardId === undefined) {
         setError('Por favor, selecione um cartão');
         return;
       }
 
-      const selectedCard = cards.find(card => card.id === cardId);
+      const selectedCard = cards.find(card => card.id == cardId);
       if (!selectedCard) {
         setError('Cartão não encontrado');
         return;
@@ -90,7 +91,7 @@ const TransactionForm: React.FC = () => {
     }
 
     // Validações para conta
-    if (paymentMethod === 'pix_debit' && !accountId) {
+    if (paymentMethod === 'pix_debit' && accountId === undefined) {
       setError('Por favor, selecione uma conta');
       return;
     }
@@ -104,14 +105,14 @@ const TransactionForm: React.FC = () => {
         date,
         payment_method: paymentMethod,
         category,
-        account_id: accountId,
-        card_id: cardId,
+        account_id: paymentMethod === 'pix_debit' ? (accountId as number | undefined) : undefined,
+        card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
         installments: paymentMethod === 'credit' ? installments : undefined,
         status: 'pending',
       });
 
       // Atualizar limite do cartão se for transação de crédito
-      if (paymentMethod === 'credit' && cardId) {
+      if (paymentMethod === 'credit' && typeof cardId === 'number') {
         await updateCardLimit(cardId, amountValue);
       }
 
@@ -340,32 +341,20 @@ const TransactionForm: React.FC = () => {
 
                   {/* Seleção de Conta/Cartão */}
                   {paymentMethod === 'pix_debit' ? (
-                    <select
-                      value={accountId}
-                      onChange={(e) => setAccountId(Number(e.target.value))}
-                      className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                    >
-                      <option value="">Selecione uma conta</option>
-                      {accounts.map(account => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} - {account.bank}
-                        </option>
-                      ))}
-                    </select>
+                    <AccountCardSelector
+                      type="account"
+                      items={accounts}
+                      selectedId={accountId}
+                      onSelect={setAccountId}
+                    />
                   ) : (
                     <>
-                      <select
-                        value={cardId}
-                        onChange={(e) => setCardId(Number(e.target.value))}
-                        className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent"
-                      >
-                        <option value="">Selecione um cartão</option>
-                        {cards.map(card => (
-                          <option key={card.id} value={card.id}>
-                            {card.name} - {card.bank}
-                          </option>
-                        ))}
-                      </select>
+                      <AccountCardSelector
+                        type="card"
+                        items={cards}
+                        selectedId={cardId}
+                        onSelect={setCardId}
+                      />
 
                       {/* Parcelas (apenas para crédito) */}
                       {paymentMethod === 'credit' && (
