@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { TransactionsProvider } from './context/TransactionsContext';
-import AuthCallback from './pages/AuthCallback';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
+import AuthCallback from './pages/auth/AuthCallback';
+import Dashboard from './pages/dashboard/Dashboard';
+import Login from './pages/auth/Login';
 import PrivateRoute from './components/PrivateRoute';
-import Wallet from './features/pages/Wallet';
-import BankAccounts from './features/pages/BankAccounts';
+import Wallet from './pages/wallet/Wallet';
+import BankAccounts from './pages/bank-accounts/BankAccounts';
 import { AccountsProvider } from './context/AccountsContext';
 
 function App() {

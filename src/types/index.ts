@@ -61,7 +61,7 @@ export const EXPENSE_CATEGORIES: Category[] = [
   { id: 'other_expense', name: 'Outros', icon: '📝', type: 'expense' },
 ];
 
-export interface Account {
+export interface BankAccountSummary {
   id: number;
   name: string;
   bank: string;
@@ -84,11 +84,11 @@ export interface Card {
 }
 
 export interface AccountsContextType {
-  accounts: Account[];
+  accounts: BankAccountSummary[];
   cards: Card[];
-  addAccount: (account: Omit<Account, 'id' | 'created_at'>) => Promise<void>;
+  addAccount: (account: Omit<BankAccountSummary, 'id' | 'created_at'>) => Promise<void>;
   addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;
   updateCardLimit: (cardId: number, amount: number) => Promise<void>;
-  getAccountById: (id: number) => Account | undefined;
+  getAccountById: (id: number) => BankAccountSummary | undefined;
   getCardById: (id: number) => Card | undefined;
 }

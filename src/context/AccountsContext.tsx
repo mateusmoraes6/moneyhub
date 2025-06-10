@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Account, Card, AccountsContextType } from '../types';
-import { mockAccounts } from '../features/wallet/data/mockAccounts';
+import { Card, AccountsContextType, BankAccountSummary } from '../types';
+import { mockAccounts } from '../features/bank-accounts/data/mockAccounts';
 import { mockCards } from '../features/wallet/data/mockCards';
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
 export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Converter os dados mockados para o formato esperado
-  const initialAccounts: Account[] = mockAccounts.map(account => ({
+  const initialAccounts: BankAccountSummary[] = mockAccounts.map(account => ({
     id: Number(account.id),
     name: account.nome_banco,
     bank: account.nome_banco,
@@ -29,12 +29,12 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     created_at: new Date().toISOString()
   }));
 
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
+  const [accounts, setAccounts] = useState<BankAccountSummary[]>(initialAccounts);
   const [cards, setCards] = useState<Card[]>(initialCards);
 
   // Adicionar conta
-  const addAccount = useCallback(async (accountData: Omit<Account, 'id' | 'created_at'>) => {
-    const newAccount: Account = {
+  const addAccount = useCallback(async (accountData: Omit<BankAccountSummary, 'id' | 'created_at'>) => {
+    const newAccount: BankAccountSummary = {
       ...accountData,
       id: Date.now(),
       created_at: new Date().toISOString(),
