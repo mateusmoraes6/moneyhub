@@ -1,9 +1,9 @@
 import React from 'react';
 import Header from '../../components/layout/Header';
-import FinancialSummary from '../../components/FinancialSummary';
-import TransactionForm from '../../components/features/transactions/TransactionForm';
-import TransactionHistory from '../../components/features/transactions/TransactionHistory';
-import ExpenseIncomeChart from '../../components/features/charts/ExpenseIncomeChart';
+import FinancialSummary from '../../components/dashboard/summary/FinancialSummary';
+import TransactionForm from '../../components/dashboard/transactions/TransactionForm';
+import TransactionHistory from '../../components/dashboard/transactions/TransactionHistory';
+import ExpenseIncomeChart from '../../components/dashboard/charts/ExpenseIncomeChart';
 
 const Dashboard: React.FC = () => {
   return (

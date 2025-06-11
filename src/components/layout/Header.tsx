@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Wallet, LogIn, LogOut, Menu } from 'lucide-react';
 import { useTransactions } from '../../context/TransactionsContext';
 import { supabase } from '../../supabaseClient';
-import AuthModal from '../modals/AuthModal';
+import AuthModal from '../auth/modals/AuthModal';
 import Sidebar from './Sidebar';
 import { Link } from 'react-router-dom';
 

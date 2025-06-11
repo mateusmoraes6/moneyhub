@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useTransactions } from '../context/TransactionsContext';
+import { useTransactions } from '../../context/TransactionsContext';
 import { CheckCircle } from 'lucide-react';
 
 const Toast: React.FC = () => {

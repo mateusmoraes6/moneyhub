@@ -4,7 +4,7 @@ import { TransactionsProvider } from './context/TransactionsContext';
 import AuthCallback from './pages/auth/AuthCallback';
 import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/auth/Login';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from './components/auth/navigation/PrivateRoute';
 import Wallet from './pages/wallet/Wallet';
 import BankAccounts from './pages/bank-accounts/BankAccounts';
 import { AccountsProvider } from './context/AccountsContext';

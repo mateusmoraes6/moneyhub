@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { useTransactions } from '../context/TransactionsContext';
-import { formatCurrency } from '../utils/formatters';
+import { useTransactions } from '../../../context/TransactionsContext';
+import { formatCurrency } from '../../../utils/formatters';
 
 const FinancialSummary: React.FC = () => {
   const { summary, loading } = useTransactions();

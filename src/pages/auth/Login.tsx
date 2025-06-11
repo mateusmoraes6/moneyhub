@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Wallet } from 'lucide-react';
-import Features from '../../components/Features';
-import AuthModal from '../../components/modals/AuthModal';
+import Features from '../../components/landing/Features';
+import AuthModal from '../../components/auth/modals/AuthModal';
 import { motion } from 'framer-motion';
 
 const Login = () => {
