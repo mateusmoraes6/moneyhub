@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { BankAccountDetails } from '../data/mockAccounts';
+import { banks } from '../data/banks';
 
-interface AddAccountModalProps {
+interface EditAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (account: Omit<BankAccountDetails, 'id'>) => void;
+  onSave: (account: BankAccountDetails) => void;
+  account: BankAccountDetails;
 }
 
-const bancos = [
-  { nome: 'Nubank', icone: '/icons/nubank.svg' },
-  { nome: 'Itaú', icone: '/icons/itau.svg' },
-  { nome: 'Banco do Brasil', icone: '/icons/bb.svg' },
-  { nome: 'C6 Bank', icone: '/icons/c6bank.svg' },
-  { nome: 'Santander', icone: '/icons/santander.svg' },
-  { nome: 'Bradesco', icone: '/icons/bradesco.svg' },
-  { nome: 'Inter', icone: '/icons/inter.svg' },
-  { nome: 'Caixa', icone: '/icons/caixa.svg' },
-];
-
-const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSave }) => {
+const EditAccountModal: React.FC<EditAccountModalProps> = ({ isOpen, onClose, onSave, account }) => {
   const [form, setForm] = useState({
-    nome_banco: '',
-    icone_url: '',
-    saldo: '',
+    nome_banco: account.nome_banco,
+    icone_url: account.icone_url,
+    saldo: account.saldo.toString(),
   });
   const [showBankSelector, setShowBankSelector] = useState(false);
 
-  const handleSelectBank = (bank: typeof bancos[0]) => {
+  useEffect(() => {
+    setForm({
+      nome_banco: account.nome_banco,
+      icone_url: account.icone_url,
+      saldo: account.saldo.toString(),
+    });
+  }, [account]);
+
+  const handleSelectBank = (bank: typeof banks[0]) => {
     setForm(prev => ({
       ...prev,
       nome_banco: bank.nome,
@@ -46,24 +45,11 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
     const saldoNumerico = form.saldo ? parseFloat(form.saldo.replace(',', '.')) : 0;
 
     onSave({
+      ...account,
       ...form,
-      numero_conta: '000000-0',
       saldo: saldoNumerico,
-      historico_saldo: [
-        {
-          data: new Date().toISOString().slice(0, 7),
-          valor: saldoNumerico,
-          gastos: 0,
-          receitas: 0,
-        },
-      ],
     });
     onClose();
-    setForm({
-      nome_banco: '',
-      icone_url: '',
-      saldo: '',
-    });
   };
 
   if (!isOpen) return null;
@@ -73,7 +59,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
       <div className="bg-gray-900 rounded-xl w-full max-w-[90vw] md:max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">Adicionar Conta Bancária</h2>
+            <h2 className="text-xl font-semibold text-white">Editar Conta Bancária</h2>
             <button
               type="button"
               onClick={onClose}
@@ -111,7 +97,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
               {showBankSelector && (
                 <div className="absolute z-10 w-full mt-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
                   <div className="p-2 space-y-2">
-                    {bancos.map((bank) => (
+                    {banks.map((bank) => (
                       <button
                         key={bank.nome}
                         type="button"
@@ -128,10 +114,10 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
             </div>
           </div>
 
-          {/* Saldo Inicial */}
+          {/* Saldo */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
-              Saldo Inicial
+              Saldo
             </label>
             <div className="relative">
               <input
@@ -153,7 +139,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
             type="submit"
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
           >
-            Adicionar Conta
+            Salvar Alterações
           </button>
         </form>
       </div>
@@ -161,4 +147,4 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
   );
 };
 
-export default AddAccountModal; 
+export default EditAccountModal; 

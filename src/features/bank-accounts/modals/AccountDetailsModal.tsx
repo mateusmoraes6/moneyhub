@@ -1,12 +1,12 @@
 import React from 'react';
-import { X, TrendingUp, Target, PieChart } from 'lucide-react';
-import { BankAccount } from '../../features/wallet/data/mockAccounts';
+import { X, TrendingUp, } from 'lucide-react';
+import { BankAccountDetails } from '../data/mockAccounts';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  account: BankAccount;
+  account: BankAccountDetails;
 }
 
 const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClose, account }) => {

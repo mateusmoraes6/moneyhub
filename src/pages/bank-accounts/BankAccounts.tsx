@@ -8,10 +8,11 @@ import AccountList from '../../features/bank-accounts/components/AccountList/Acc
 import { useBankAccounts } from '../../features/bank-accounts/hooks/useBankAccounts';
 import { useCurrencyFormat } from '../../features/bank-accounts/hooks/useCurrencyFormat';
 import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountModals';
+import { BankAccountDetails } from '../../features/bank-accounts/data/mockAccounts'
 
 const BankAccounts: React.FC = () => {
   const navigate = useNavigate();
-  const { accounts, handleDelete, handleAddAccount } = useBankAccounts();
+  const { accounts, handleDelete, handleAddAccount, handleUpdateAccount } = useBankAccounts();
   const { formatCurrency } = useCurrencyFormat();
   const {
     selectedAccount,
@@ -24,6 +25,10 @@ const BankAccounts: React.FC = () => {
   } = useAccountModals();
 
   const totalBalance = accounts.reduce((acc, account) => acc + account.saldo, 0);
+
+  const handleEditAccount = (account: BankAccountDetails) => {
+    handleUpdateAccount(account);
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
@@ -68,7 +73,7 @@ const BankAccounts: React.FC = () => {
 
           <AccountList
             accounts={accounts}
-            onEdit={openAccountDetails}
+            onEdit={handleEditAccount}
             onDelete={handleDelete}
             onViewDetails={openAccountDetails}
           />
