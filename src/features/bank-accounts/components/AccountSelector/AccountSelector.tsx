@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Account } from '../../types/account';
+import BankIcon from '../../../../components/common/BankIcon';
 
 interface AccountSelectorProps {
   accounts: Account[];
@@ -20,9 +21,11 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
   const getDisplayData = (account: Account) => {
     const bankName = account.nome_banco;
     const iconUrl = account.icone_url;
-    const extraInfo = `Saldo: R$ ${account.saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const saldo = account.saldo;
+    const extraInfo = `Saldo: R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const saldoColor = saldo >= 0 ? 'text-emerald-400' : 'text-red-400';
 
-    return { bankName, iconUrl, extraInfo };
+    return { bankName, iconUrl, extraInfo, saldoColor };
   };
 
   const selectedAccountData = selectedAccount ? getDisplayData(selectedAccount) : null;
@@ -50,13 +53,10 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
       >
         <div className="flex items-center space-x-3">
           {selectedAccountData?.iconUrl && (
-            <img
-              src={selectedAccountData.iconUrl}
-              alt={selectedAccountData.bankName}
-              className="w-6 h-6"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+            <BankIcon
+              iconUrl={selectedAccountData.iconUrl}
+              bankName={selectedAccountData.bankName}
+              size="sm"
             />
           )}
           <span className={selectedAccount ? 'text-white' : 'text-gray-400'}>
@@ -92,20 +92,19 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
                   className="w-full p-3 rounded-lg flex items-center space-x-3 hover:bg-gray-700 transition-colors duration-200"
                 >
                   {accountData.iconUrl && (
-                    <img
-                      src={accountData.iconUrl}
-                      alt={accountData.bankName}
-                      className="w-6 h-6"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
+                    <BankIcon
+                      iconUrl={accountData.iconUrl}
+                      bankName={accountData.bankName}
+                      size="sm"
                     />
                   )}
                   <div className="flex-1 text-left">
                     <p className="text-white font-medium">
                       {accountData.bankName}
                     </p>
-                    <p className="text-sm text-gray-400">{accountData.extraInfo}</p>
+                    <p className={`text-sm ${accountData.saldoColor}`}>
+                      {accountData.extraInfo}
+                    </p>
                   </div>
                 </button>
               );

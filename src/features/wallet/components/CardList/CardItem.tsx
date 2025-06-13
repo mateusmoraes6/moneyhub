@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '../../types';
 import LimitDonutChart from '../CardChart/LimitDonutChart';
 import CardDetailsModal from '../../modals/CardDetailsModal';
+import BankIcon from '../../../../components/common/BankIcon';
 
 interface CardItemProps {
   card: Card;
@@ -91,10 +92,10 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
 
         {/* Bloco 1 — Identificação */}
         <div className="flex items-center gap-3 mb-4">
-          <img
-            src={card.icone_url}
-            alt={card.nome_banco}
-            className="w-10 h-10 rounded-lg bg-white p-0.5"
+          <BankIcon
+            iconUrl={card.icone_url}
+            bankName={card.nome_banco}
+            size="md"
           />
           <div>
             <h3 className="text-lg font-semibold text-white">{card.apelido}</h3>

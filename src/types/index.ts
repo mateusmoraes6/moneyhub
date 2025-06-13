@@ -43,8 +43,6 @@ export const INCOME_CATEGORIES: Category[] = [
   { id: 'salary', name: 'Salário', icon: '💰', type: 'income' },
   { id: 'freelance', name: 'Freelance', icon: '💼', type: 'income' },
   { id: 'sales', name: 'Vendas', icon: '🛍️', type: 'income' },
-  { id: 'investments', name: 'Investimentos', icon: '📈', type: 'income' },
-  { id: 'rent', name: 'Aluguel Recebido', icon: '🏠', type: 'income' },
   { id: 'bonus', name: 'Bonificação', icon: '🎁', type: 'income' },
   { id: 'other_income', name: 'Outros', icon: '📝', type: 'income' },
 ];
@@ -57,6 +55,9 @@ export const EXPENSE_CATEGORIES: Category[] = [
   { id: 'leisure', name: 'Lazer', icon: '🎮', type: 'expense' },
   { id: 'home', name: 'Casa', icon: '🏡', type: 'expense' },
   { id: 'clothes', name: 'Roupas', icon: '👕', type: 'expense' },
+  { id: 'travel', name: 'Viagens', icon: '✈️', type: 'expense' },
+  { id: 'subscriptions', name: 'Assinaturas e Streaming', icon: '📺', type: 'expense' },
+  { id: 'beauty', name: 'Beleza e Estética', icon: '💇', type: 'expense' },
   { id: 'bills', name: 'Contas', icon: '📄', type: 'expense' },
   { id: 'other_expense', name: 'Outros', icon: '📝', type: 'expense' },
 ];

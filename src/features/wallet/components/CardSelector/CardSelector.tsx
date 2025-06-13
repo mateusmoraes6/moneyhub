@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '../../types/card';
+import BankIcon from '../../../../components/common/BankIcon';
 
 interface CardSelectorProps {
   cards: Card[];
@@ -50,18 +51,15 @@ const CardSelector: React.FC<CardSelectorProps> = ({
       >
         <div className="flex items-center space-x-3">
           {selectedCardData?.iconUrl && (
-            <img
-              src={selectedCardData.iconUrl}
-              alt={selectedCardData.bankName}
-              className="w-6 h-6"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+            <BankIcon
+              iconUrl={selectedCardData.iconUrl}
+              bankName={selectedCardData.bankName}
+              size="sm"
             />
           )}
           <span className={selectedCard ? 'text-white' : 'text-gray-400'}>
             {selectedCardData
-              ? `${selectedCardData.bankName} - ${selectedCard?.apelido}`
+              ? selectedCardData.bankName
               : 'Selecione um cartão'
             }
           </span>
@@ -92,18 +90,15 @@ const CardSelector: React.FC<CardSelectorProps> = ({
                   className="w-full p-3 rounded-lg flex items-center space-x-3 hover:bg-gray-700 transition-colors duration-200"
                 >
                   {cardData.iconUrl && (
-                    <img
-                      src={cardData.iconUrl}
-                      alt={cardData.bankName}
-                      className="w-6 h-6"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
+                    <BankIcon
+                      iconUrl={cardData.iconUrl}
+                      bankName={cardData.bankName}
+                      size="sm"
                     />
                   )}
                   <div className="flex-1 text-left">
                     <p className="text-white font-medium">
-                      {`${cardData.bankName} - ${card.apelido}`}
+                      {cardData.bankName}
                     </p>
                     <p className="text-sm text-gray-400">{cardData.extraInfo}</p>
                   </div>

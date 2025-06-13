@@ -1,4 +1,5 @@
 import React from 'react';
+import BankIcon from '../../../../components/common/BankIcon';
 
 interface Bank {
   nome: string;
@@ -24,7 +25,11 @@ const CardBankSelector: React.FC<CardBankSelectorProps> = ({ bancos, selected, o
         }`}
         onClick={() => onSelect(bank)}
       >
-        <img src={bank.icone} alt={bank.nome} className="w-8 h-8 mb-1" />
+        <BankIcon
+          iconUrl={bank.icone}
+          bankName={bank.nome}
+          size="md"
+        />
         <span className="text-xs text-gray-200">{bank.nome}</span>
       </button>
     ))}

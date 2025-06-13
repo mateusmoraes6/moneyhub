@@ -4,6 +4,7 @@ import { BankAccountDetails } from '../../data/mockAccounts';
 import AccountChart from '../AccountChart/AccountChart';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
 import EditAccountModal from '../../modals/EditAccountModal';
+import BankIcon from '../../../../components/common/BankIcon';
 
 interface AccountCardProps {
   account: BankAccountDetails;                    // Dados da conta
@@ -38,10 +39,10 @@ const AccountCard: React.FC<AccountCardProps> = ({
         {/* Cabeçalho do card */}
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
-            <img
-              src={account.icone_url}
-              alt={account.nome_banco}
-              className="w-12 h-12 rounded-lg bg-white p-0.5"
+            <BankIcon
+              iconUrl={account.icone_url}
+              bankName={account.nome_banco}
+              size="lg"
             />
             <div>
               <h3 className="text-lg font-semibold text-white">{account.nome_banco}</h3>

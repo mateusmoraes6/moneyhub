@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, Fatura, Parcelamento, Transacao, FiltrosTransacao } from '../types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import BankIcon from '../../../components/common/BankIcon';
 
 interface CardDetailsModalProps {
   isOpen: boolean;
@@ -84,10 +85,10 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
         {/* Cabeçalho */}
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img 
-              src={card.icone_url} 
-              alt={card.nome_banco} 
-              className="w-12 h-12 rounded-lg bg-white p-0.5"
+            <BankIcon
+              iconUrl={card.icone_url}
+              bankName={card.nome_banco}
+              size="lg"
             />
             <div>
               <h2 className="text-xl font-semibold text-white">{card.apelido}</h2>
