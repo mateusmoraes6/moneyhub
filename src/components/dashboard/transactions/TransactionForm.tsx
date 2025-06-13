@@ -10,11 +10,20 @@ const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
   const { accounts, cards, updateCardLimit } = useAccounts();
 
+  // Função auxiliar para normalizar o nome do banco
+  const normalizeBankName = (name: string) => {
+    return name
+      .normalize("NFD") // Normaliza para decompor caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, "") // Remove os diacríticos (acentos)
+      .toLowerCase() // Converte para minúsculas
+      .replace(/\s/g, ""); // Remove todos os espaços em branco
+  };
+
   const mapAccountToSelector = (account: BankAccountSummary) => ({
     id: account.id.toString(),
     nome_banco: account.bank,
     numero_conta: account.type,
-    icone_url: `/icons/${account.bank.toLowerCase()}.svg`,
+    icone_url: `/icons/${normalizeBankName(account.bank)}.svg`,
     saldo: account.balance,
     historico_saldo: []
   });
@@ -22,7 +31,7 @@ const TransactionForm: React.FC = () => {
   const mapCardToSelector = (card: Card) => ({
     id: card.id,
     nome_banco: card.bank,
-    icone_url: `/icons/${card.bank.toLowerCase()}.svg`,
+    icone_url: `/icons/${normalizeBankName(card.bank)}.svg`,
     apelido: card.name,
     limite_total: card.limit,
     limite_disponivel: card.available_limit,
