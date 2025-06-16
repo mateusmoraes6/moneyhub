@@ -3,6 +3,8 @@ import { Card, Fatura, Parcelamento, Transacao, FiltrosTransacao } from '../type
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import BankIcon from '../../../components/common/BankIcon';
+import LimitDonutChart from '../components/CardChart/LimitDonutChart';
+import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 
 interface CardDetailsModalProps {
   isOpen: boolean;
@@ -59,16 +61,31 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
     });
   }, [transacoes, filtros]);
 
-  if (!isOpen) return null;
+  // Cálculo do limite utilizado
+  const limiteUsado = card.limite_total - card.limite_disponivel;
+  const percentualUsado = Math.round((limiteUsado / card.limite_total) * 100);
 
-  const getStatusColor = (status: Fatura['status']) => {
+  // Função para cor do texto do status
+  const getStatusTextColor = (status: Fatura['status']) => {
     switch (status) {
-      case 'pago': return 'bg-emerald-500';
-      case 'em_aberto': return 'bg-yellow-500';
-      case 'atrasado': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'pago': return 'text-emerald-400';
+      case 'em_aberto': return 'text-yellow-400';
+      case 'atrasado': return 'text-red-400';
+      default: return 'text-gray-400';
     }
   };
+
+  // Função para ícone do status
+  const getStatusIcon = (status: Fatura['status']) => {
+    switch (status) {
+      case 'pago': return <CheckCircle2 className="w-5 h-5 text-emerald-400 inline" />;
+      case 'em_aberto': return <Clock className="w-5 h-5 text-yellow-400 inline" />;
+      case 'atrasado': return <AlertCircle className="w-5 h-5 text-red-400 inline" />;
+      default: return null;
+    }
+  };
+
+  if (!isOpen) return null;
 
   const getStatusText = (status: Fatura['status']) => {
     switch (status) {
@@ -84,7 +101,7 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
       <div className="bg-gray-900 w-full md:w-[90%] lg:w-[800px] h-[90vh] md:h-[80vh] rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col">
         {/* Cabeçalho */}
         <div className="p-6 border-b border-gray-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <BankIcon
               iconUrl={card.icone_url}
               bankName={card.nome_banco}
@@ -93,6 +110,20 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
             <div>
               <h2 className="text-xl font-semibold text-white">{card.apelido}</h2>
               <p className="text-sm text-gray-400">{card.nome_banco}</p>
+              {/* Status do limite */}
+              <div className="flex items-center gap-2 mt-2">
+                <LimitDonutChart
+                  limiteTotal={card.limite_total}
+                  limiteDisponivel={card.limite_disponivel}
+                  size={40}
+                />
+                <span className="text-xs text-gray-400">
+                  Limite usado: <span className="font-bold text-white">{percentualUsado}%</span>
+                </span>
+                <span className="text-xs text-gray-400">
+                  (R$ {limiteUsado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {card.limite_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                </span>
+              </div>
             </div>
           </div>
           <button
@@ -130,14 +161,20 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                   R$ {fatura.valor_pendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="bg-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-400">Vencimento</p>
-                <p className="text-2xl font-semibold text-white">
+              <div className="bg-gray-800 p-4 rounded-lg flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(fatura.status)}
+                  <span className={`font-semibold ${getStatusTextColor(fatura.status)}`}>
+                    {getStatusText(fatura.status)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 mt-2">Próximo Vencimento</p>
+                <p className="text-lg font-semibold text-white">
                   {format(new Date(fatura.data_vencimento), "dd 'de' MMMM", { locale: ptBR })}
                 </p>
-                <span className={`inline-block px-2 py-1 rounded-full text-xs text-white mt-2 ${getStatusColor(fatura.status)}`}>
-                  {getStatusText(fatura.status)}
-                </span>
+                <p className="text-xs text-gray-400">
+                  Fechamento: {card.data_fechamento} | Vencimento: {card.data_vencimento}
+                </p>
               </div>
             </div>
           </section>
@@ -146,27 +183,33 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
           <section>
             <h3 className="text-lg font-semibold text-white mb-4">Parcelamentos</h3>
             <div className="space-y-4">
-              {parcelamentos.map(parcelamento => (
-                <div key={parcelamento.id} className="bg-gray-800 p-4 rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h4 className="text-white font-medium">{parcelamento.descricao}</h4>
-                      <p className="text-sm text-gray-400">
-                        Parcela {parcelamento.parcela_atual} de {parcelamento.parcelas_total}
+              {parcelamentos.map(parcelamento => {
+                const valorPago = parcelamento.valor_parcela * (parcelamento.parcela_atual - 1);
+                return (
+                  <div key={parcelamento.id} className="bg-gray-800 p-4 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="text-white font-medium">{parcelamento.descricao}</h4>
+                        <p className="text-sm text-gray-400">
+                          Parcela {parcelamento.parcela_atual} de {parcelamento.parcelas_total}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Pago: R$ {valorPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <p className="text-lg font-semibold text-white">
+                        R$ {parcelamento.valor_parcela.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
-                    <p className="text-lg font-semibold text-white">
-                      R$ {parcelamento.valor_parcela.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-emerald-500 h-2 rounded-full"
+                        style={{ width: `${(parcelamento.parcela_atual / parcelamento.parcelas_total) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className="bg-emerald-500 h-2 rounded-full"
-                      style={{ width: `${(parcelamento.parcela_atual / parcelamento.parcelas_total) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
