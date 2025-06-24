@@ -10,10 +10,11 @@ export interface Transaction {
   created_at: string;
   user_id: string;
   payment_method: PaymentMethod;
-  category: string;
+  category_id: string;
   account_id?: number;
   card_id?: number;
-  installments?: number;
+  installment_id?: string;
+  installment_num?: number;
   status: 'pending' | 'paid' | 'overdue';
   due_date?: string;
 }
@@ -64,23 +65,21 @@ export const EXPENSE_CATEGORIES: Category[] = [
 
 export interface BankAccountSummary {
   id: number;
-  name: string;
-  bank: string;
+  // name: string;
+  bank_name: string;
   balance: number;
-  type: 'checking' | 'savings';
-  is_active: boolean;
+  // type: 'checking' | 'savings';
   created_at: string;
 }
 
 export interface Card {
   id: number;
-  name: string;
-  bank: string;
+  // name: string;
+  bank_name: string;
   limit: number;
   available_limit: number;
   closing_day: number;
   due_day: number;
-  is_active: boolean;
   created_at: string;
 }
 
@@ -88,8 +87,12 @@ export interface AccountsContextType {
   accounts: BankAccountSummary[];
   cards: Card[];
   addAccount: (account: Omit<BankAccountSummary, 'id' | 'created_at'>) => Promise<void>;
+  updateAccount: (accountId: number, accountData: Partial<BankAccountSummary>) => Promise<void>;
+  deleteAccount: (accountId: number) => Promise<void>;
   addCard: (card: Omit<Card, 'id' | 'created_at'>) => Promise<void>;
   updateCardLimit: (cardId: number, amount: number) => Promise<void>;
   getAccountById: (id: number) => BankAccountSummary | undefined;
   getCardById: (id: number) => Card | undefined;
+  loading: boolean;
+  error: string | null;
 }

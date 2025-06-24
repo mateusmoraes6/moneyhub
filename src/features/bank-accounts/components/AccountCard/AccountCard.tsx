@@ -1,34 +1,33 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
-import { BankAccountDetails } from '../../data/mockAccounts';
+import { Account } from '../../types/account';
 import AccountChart from '../AccountChart/AccountChart';
 import { useCurrencyFormat } from '../../hooks/useCurrencyFormat';
 import EditAccountModal from '../../modals/EditAccountModal';
 import BankIcon from '../../../../components/common/BankIcon';
 
 interface AccountCardProps {
-  account: BankAccountDetails;                    // Dados da conta
-  onEdit: (account: BankAccountDetails) => void;  // Função para editar
-  onDelete: (account: BankAccountDetails) => void;// Função para deletar
-  onViewDetails: (account: BankAccountDetails) => void; // Função para ver detalhes
+  account: Account;
+  onEdit: (account: Account) => void;
+  onDelete: (account: Account) => void;
+  onViewDetails: (account: Account) => void;
 }
 
-// Criamos o componente
-const AccountCard: React.FC<AccountCardProps> = ({ 
-  account, 
-  onEdit, 
-  onDelete, 
-  onViewDetails 
+const AccountCard: React.FC<AccountCardProps> = ({
+  account,
+  onEdit,
+  onDelete,
+  onViewDetails,
 }) => {
   const { formatCurrency } = useCurrencyFormat();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Previne que o evento se propague
+    e.stopPropagation();
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (updatedAccount: BankAccountDetails) => {
+  const handleSaveEdit = (updatedAccount: Account) => {
     onEdit(updatedAccount);
     setIsEditModalOpen(false);
   };
@@ -50,13 +49,13 @@ const AccountCard: React.FC<AccountCardProps> = ({
           </div>
           {/* Botões de ação */}
           <div className="flex flex-col items-center space-y-2">
-            <button 
+            <button
               onClick={handleEdit}
               className="text-gray-400 hover:text-white transition-colors"
             >
               <Edit2 className="w-5 h-5" />
             </button>
-            <button 
+            <button
               onClick={() => onDelete(account)}
               className="text-gray-400 hover:text-white transition-colors"
             >
@@ -81,7 +80,7 @@ const AccountCard: React.FC<AccountCardProps> = ({
 
           {/* Botão ver detalhes */}
           <div className="mt-4 flex items-center justify-center text-sm">
-            <button 
+            <button
               onClick={() => onViewDetails(account)}
               className="text-gray-400 hover:text-white transition-colors"
             >

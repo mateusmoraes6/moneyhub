@@ -4,8 +4,8 @@ import BankIcon from '../../../../components/common/BankIcon';
 
 interface AccountSelectorProps {
   accounts: Account[];
-  selectedId?: string;
-  onSelect: (id: string) => void;
+  selectedId?: number;
+  onSelect: (id: number) => void;
 }
 
 const AccountSelector: React.FC<AccountSelectorProps> = ({

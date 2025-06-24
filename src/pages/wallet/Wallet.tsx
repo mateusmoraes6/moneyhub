@@ -1,34 +1,16 @@
 import React, { useState } from 'react';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
-import { mockCards } from '../../features/wallet/data/mockCards';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header';
-
-interface Card {
-  id: number;
-  nome_banco: string;
-  icone_url: string;
-  apelido: string;
-  limite_total: number;
-  limite_disponivel: number;
-  data_fechamento: number;
-  data_vencimento: number;
-}
-
-interface CardFormValues {
-  nome_banco: string;
-  icone_url: string;
-  apelido: string;
-  limite_total: number;
-  limite_disponivel: number;
-  data_fechamento?: number;
-  data_vencimento?: number;
-}
+import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
+import { useTransactions } from '../../context/TransactionsContext';
+import { Card, CardFormValues } from '../../features/wallet/types/card';
 
 const Wallet: React.FC = () => {
   const navigate = useNavigate();
-  const [cards, setCards] = useState<Card[]>(mockCards);
+  const { user } = useTransactions();
+  const { cards, loading, error, addCard, editCard, deleteCard } = useWalletCards(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -46,11 +28,13 @@ const Wallet: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (card: Card) => setCards(cards.filter(c => c.id !== card.id));
+  const handleDelete = async (card: Card) => {
+    await deleteCard(card.id);
+  };
   const handleSelect = (card: Card) => {/* mostrar transações do cartão futuramente */};
 
   // Função para salvar cartão (novo ou editado)
-  const handleSave = (newCard: CardFormValues) => {
+  const handleSave = async (newCard: CardFormValues) => {
     const cardToSave = {
       ...newCard,
       data_fechamento: newCard.data_fechamento ?? 1,
@@ -58,19 +42,17 @@ const Wallet: React.FC = () => {
     };
 
     if (isEditing && selectedCard) {
-      setCards(prev => prev.map(card => 
-        card.id === selectedCard.id ? { ...cardToSave, id: card.id } : card
-      ));
+      await editCard(selectedCard.id, cardToSave);
     } else {
-      setCards(prev => [
-        ...prev,
-        { ...cardToSave, id: Date.now() }
-      ]);
+      await addCard(cardToSave);
     }
     setShowModal(false);
     setIsEditing(false);
     setSelectedCard(null);
   };
+
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>Erro: {error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">

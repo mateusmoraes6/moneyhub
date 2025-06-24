@@ -108,7 +108,7 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
               size="lg"
             />
             <div>
-              <h2 className="text-xl font-semibold text-white">{card.apelido}</h2>
+              {/* <h2 className="text-xl font-semibold text-white">{card.apelido}</h2> */}
               <p className="text-sm text-gray-400">{card.nome_banco}</p>
               {/* Status do limite */}
               <div className="flex items-center gap-2 mt-2">

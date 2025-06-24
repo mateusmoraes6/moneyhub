@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { BankAccountDetails } from '../data/mockAccounts';
+import { BankAccountSummary } from '../../../types';
 
 interface AddAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (account: Omit<BankAccountDetails, 'id'>) => void;
+  onSave: (account: Omit<BankAccountSummary, 'id' | 'created_at'>) => void;
 }
 
 const bancos = [
@@ -21,48 +21,43 @@ const bancos = [
 
 const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSave }) => {
   const [form, setForm] = useState({
-    nome_banco: '',
-    icone_url: '',
-    saldo: '',
+    name: '',
+    bank_name: '',
+    balance: '',
+    type: 'checking' as 'checking' | 'savings'
   });
   const [showBankSelector, setShowBankSelector] = useState(false);
 
-  const handleSelectBank = (bank: typeof bancos[0]) => {
+  const handleSelectBank = (bank_name: typeof bancos[0]) => {
     setForm(prev => ({
       ...prev,
-      nome_banco: bank.nome,
-      icone_url: bank.icone,
+      name: bank_name.nome,
+      bank_name: bank_name.nome,
     }));
     setShowBankSelector(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome_banco) {
+    if (!form.name) {
       alert('Por favor, selecione um banco.');
       return;
     }
 
-    const saldoNumerico = form.saldo ? parseFloat(form.saldo.replace(',', '.')) : 0;
+    const balance = form.balance ? parseFloat(form.balance.replace(',', '.')) : 0;
 
     onSave({
-      ...form,
-      numero_conta: '000000-0',
-      saldo: saldoNumerico,
-      historico_saldo: [
-        {
-          data: new Date().toISOString().slice(0, 7),
-          valor: saldoNumerico,
-          gastos: 0,
-          receitas: 0,
-        },
-      ],
+      // name: form.name,
+      bank_name: form.bank_name,
+      balance: balance,
+      // type: form.type,
     });
     onClose();
     setForm({
-      nome_banco: '',
-      icone_url: '',
-      saldo: '',
+      name: '',
+      bank_name: '',
+      balance: '',
+      type: 'checking'
     });
   };
 
@@ -93,12 +88,12 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
                 type="button"
                 onClick={() => setShowBankSelector(!showBankSelector)}
                 className={`w-full p-4 bg-gray-800 border rounded-lg text-left flex items-center justify-between
-                  ${form.nome_banco ? 'border-green-500' : 'border-gray-700'}`}
+                  ${form.name ? 'border-green-500' : 'border-gray-700'}`}
               >
-                {form.nome_banco ? (
+                {form.bank_name ? (
                   <div className="flex items-center gap-3">
-                    <img src={form.icone_url} alt={form.nome_banco} className="w-6 h-6" />
-                    <span className="font-medium text-white">{form.nome_banco}</span>
+                    <img src={`/icons/${form.bank_name.toLowerCase().replace(' ', '')}.svg`} alt={form.name} className="w-6 h-6" />
+                    <span className="font-medium text-white">{form.name}</span>
                   </div>
                 ) : (
                   <span className="text-gray-400">Selecione um banco</span>
@@ -111,20 +106,51 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
               {showBankSelector && (
                 <div className="absolute z-10 w-full mt-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
                   <div className="p-2 space-y-2">
-                    {bancos.map((bank) => (
+                    {bancos.map((bank_name) => (
                       <button
-                        key={bank.nome}
+                        key={bank_name.nome}
                         type="button"
-                        onClick={() => handleSelectBank(bank)}
+                        onClick={() => handleSelectBank(bank_name)}
                         className="w-full p-3 flex items-center gap-3 hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        <img src={bank.icone} alt={bank.nome} className="w-6 h-6" />
-                        <span className="font-medium text-white">{bank.nome}</span>
+                        <img src={bank_name.icone} alt={bank_name.nome} className="w-6 h-6" />
+                        <span className="font-medium text-white">{bank_name.nome}</span>
                       </button>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Tipo de Conta */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Tipo de Conta
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, type: 'checking' }))}
+                className={`p-3 rounded-lg border transition-colors ${
+                  form.type === 'checking'
+                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
+                }`}
+              >
+                Conta Corrente
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, type: 'savings' }))}
+                className={`p-3 rounded-lg border transition-colors ${
+                  form.type === 'savings'
+                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
+                }`}
+              >
+                Poupança
+              </button>
             </div>
           </div>
 
@@ -136,12 +162,12 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
             <div className="relative">
               <input
                 type="text"
-                value={form.saldo}
+                value={form.balance}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d,.]/g, '');
                   const parts = value.split(/[,.]/);
                   if (parts.length > 2) return;
-                  setForm(prev => ({ ...prev, saldo: value }));
+                  setForm(prev => ({ ...prev, balance: value }));
                 }}
                 placeholder="R$ 0,00"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"

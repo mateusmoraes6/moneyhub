@@ -1,9 +1,9 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BankAccountDetails } from '../../data/mockAccounts';
+import { Account } from '../../types/account';
 
 interface AccountChartProps {
-  historico: BankAccountDetails['historico_saldo'];
+  historico: Account['historico_saldo'];
 }
 
 const AccountChart: React.FC<AccountChartProps> = ({ historico }) => {

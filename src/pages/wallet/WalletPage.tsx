@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CardList from '../../features/wallet/components/CardList/CardList';
 import CardFormModal from '../../features/wallet/modals/CardFormModal';
 import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
-import { Card, CardFormValues } from '../../features/wallet/types';
-
-import { mockCards } from '../../features/wallet/data/mockCards';
+import { Card, CardFormValues } from '../../features/wallet/types/card';
+import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
+import { useTransactions } from '../../context/TransactionsContext';
 
 export default function WalletPage() {
-  const [cards, setCards] = useState<Card[]>(mockCards);
+  const { user } = useTransactions();
+  const { cards, loading, error, addCard, editCard, deleteCard } = useWalletCards(user?.id);
   const [showModal, setShowModal] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -24,28 +25,43 @@ export default function WalletPage() {
     setShowModal(true);
   };
   
-  const handleDelete = (card: Card) => setCards(cards.filter(c => c.id !== card.id));
+  const handleDelete = async (card: Card) => {
+    await deleteCard(card.id);
+  };
+
   const handleSelect = (card: Card) => setSelectedCard(card);
 
-  const handleSave = (newCard: CardFormValues) => {
+  const handleSave = async (newCard: CardFormValues) => {
+    const cardToSave = {
+      ...newCard,
+      data_fechamento: newCard.data_fechamento ?? 1,
+      data_vencimento: newCard.data_vencimento ?? 1,
+    };
+
     if (isEditing && selectedCard) {
-      setCards(prev => prev.map(card => 
-        card.id === selectedCard.id ? { ...newCard, id: card.id } : card
-      ));
+      await editCard(selectedCard.id, cardToSave);
     } else {
-      setCards(prev => [
-        ...prev,
-        { ...newCard, id: Date.now() }
-      ]);
+      await addCard(cardToSave);
     }
     setShowModal(false);
     setIsEditing(false);
     setSelectedCard(null);
   };
 
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>Erro: {error}</div>;
+
   return (
     <div className="max-w-3xl mx-auto mt-8 p-4">
-      {/* ...botão voltar, título, botão adicionar... */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-white">Meus Cartões</h1>
+        <button
+          onClick={handleAdd}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition"
+        >
+          + Adicionar Cartão
+        </button>
+      </div>
       <CardList
         cards={cards}
         onEdit={handleEdit}
@@ -63,7 +79,7 @@ export default function WalletPage() {
         initialValues={isEditing && selectedCard ? selectedCard : undefined}
       />
       {selectedCard && (
-        <CardTransactions cardId={selectedCard.id} />
+        <CardTransactions cardId={selectedCard.id} onClose={() => setSelectedCard(null)} />
       )}
     </div>
   );

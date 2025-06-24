@@ -1,64 +1,177 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Card, AccountsContextType, BankAccountSummary } from '../types';
-import { mockAccounts } from '../features/bank-accounts/data/mockAccounts';
-import { mockCards } from '../features/wallet/data/mockCards';
+import { supabase } from '../supabaseClient';
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
 export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Converter os dados mockados para o formato esperado
-  const initialAccounts: BankAccountSummary[] = mockAccounts.map(account => ({
-    id: Number(account.id),
-    name: account.nome_banco,
-    bank: account.nome_banco,
-    balance: account.saldo,
-    type: 'checking',
-    is_active: true,
-    created_at: new Date().toISOString()
-  }));
+  const [accounts, setAccounts] = useState<BankAccountSummary[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const initialCards: Card[] = mockCards.map(card => ({
-    id: card.id,
-    name: card.apelido,
-    bank: card.nome_banco,
-    limit: card.limite_total,
-    available_limit: card.limite_disponivel,
-    closing_day: card.data_fechamento,
-    due_day: card.data_vencimento,
-    is_active: true,
-    created_at: new Date().toISOString()
-  }));
+  // Buscar contas do Supabase
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setAccounts([]);
+        return;
+      }
 
-  const [accounts, setAccounts] = useState<BankAccountSummary[]>(initialAccounts);
-  const [cards, setCards] = useState<Card[]>(initialCards);
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAccounts(
+        (data || []).map(acc => ({
+          ...acc,
+          bank_name: acc.bank_name,
+        }))
+      );
+    } catch (err) {
+      console.error('Erro ao buscar contas:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar contas');
+    }
+  }, []);
+
+  // Buscar cartões do Supabase
+  const fetchCards = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setCards([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCards(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar cartões:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar cartões');
+    }
+  }, []);
+
+  // Carregar dados quando o usuário estiver autenticado
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session) {
+        fetchAccounts();
+        fetchCards();
+      } else {
+        setAccounts([]);
+        setCards([]);
+      }
+      setLoading(false);
+    });
+
+    // Verificar estado inicial
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await fetchAccounts();
+        await fetchCards();
+      }
+      setLoading(false);
+    };
+    
+    checkUser();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetchAccounts, fetchCards]);
 
   // Adicionar conta
   const addAccount = useCallback(async (accountData: Omit<BankAccountSummary, 'id' | 'created_at'>) => {
-    const newAccount: BankAccountSummary = {
-      ...accountData,
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-    };
-    setAccounts(prev => [...prev, newAccount]);
-  }, []);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { error } = await supabase
+        .from('accounts')
+        .insert([{
+          // name: accountData.name,
+          bank_name: accountData.bank_name,
+          balance: accountData.balance,
+          // type: accountData.type,
+          user_id: user.id,
+        }]);
+
+      if (error) throw error;
+      await fetchAccounts();
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error('Erro ao adicionar conta:', err.message);
+      } else if (typeof err === 'object' && err !== null && 'message' in err) {
+        console.error('Erro ao adicionar conta:', (err as any).message);
+      } else {
+        console.error('Erro ao adicionar conta:', JSON.stringify(err));
+      }
+      throw err;
+    }
+  }, [fetchAccounts]);
 
   // Adicionar cartão
   const addCard = useCallback(async (cardData: Omit<Card, 'id' | 'created_at'>) => {
-    const newCard: Card = {
-      ...cardData,
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-    };
-    setCards(prev => [...prev, newCard]);
-  }, []);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { error } = await supabase
+        .from('cards')
+        .insert([{
+          ...cardData,
+          user_id: user.id,
+        }]);
+
+      if (error) throw error;
+      await fetchCards();
+    } catch (err) {
+      console.error('Erro ao adicionar cartão:', err);
+      throw err;
+    }
+  }, [fetchCards]);
 
   // Atualizar limite do cartão
   const updateCardLimit = useCallback(async (cardId: number, amount: number) => {
-    setCards(prev => prev.map(card => 
-      card.id === cardId 
-        ? { ...card, available_limit: card.available_limit - amount }
-        : card
-    ));
+    try {
+      // Buscar o cartão atual
+      const { data: card, error: fetchError } = await supabase
+        .from('cards')
+        .select('available_limit')
+        .eq('id', cardId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newLimit = (card?.available_limit ?? 0) - amount;
+
+      const { error } = await supabase
+        .from('cards')
+        .update({ available_limit: newLimit })
+        .eq('id', cardId);
+
+      if (error) throw error;
+
+      setCards(prev => prev.map(card =>
+        card.id === cardId
+          ? { ...card, available_limit: newLimit }
+          : card
+      ));
+    } catch (err) {
+      console.error('Erro ao atualizar limite do cartão:', err);
+      throw err;
+    }
   }, []);
 
   // Buscar conta por ID
@@ -71,14 +184,50 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return cards.find(card => card.id === id);
   }, [cards]);
 
+  // Atualizar conta
+  const updateAccount = useCallback(async (accountId: number, accountData: Partial<BankAccountSummary>) => {
+    try {
+      const { error } = await supabase
+        .from('accounts')
+        .update(accountData)
+        .eq('id', accountId);
+
+      if (error) throw error;
+      await fetchAccounts();
+    } catch (err) {
+      console.error('Erro ao atualizar conta:', err);
+      throw err;
+    }
+  }, [fetchAccounts]);
+
+  // Deletar conta
+  const deleteAccount = useCallback(async (accountId: number) => {
+    try {
+      const { error } = await supabase
+        .from('accounts')
+        .delete()
+        .eq('id', accountId);
+
+      if (error) throw error;
+      await fetchAccounts();
+    } catch (err) {
+      console.error('Erro ao deletar conta:', err);
+      throw err;
+    }
+  }, [fetchAccounts]);
+
   const value = {
     accounts,
     cards,
     addAccount,
+    updateAccount,
+    deleteAccount,
     addCard,
     updateCardLimit,
     getAccountById,
     getCardById,
+    loading,
+    error
   };
 
   return (

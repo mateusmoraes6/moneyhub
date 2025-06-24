@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../../supabaseClient';
 
 // Import TransactionList
 // import TransactionList from 'caminho/do/TransactionList';
@@ -18,33 +19,54 @@ interface CardTransactionsProps {
 }
 
 const CardTransactions: React.FC<CardTransactionsProps> = ({ cardId, onClose }) => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      const { data } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('card_id', cardId);
+      setTransactions(data?.map(t => ({
+        id: Number(t.id),
+        descricao: t.description,
+        valor: t.amount,
+        data: t.date,
+        categoria: t.type,
+        status: t.type === 'expense' ? 'pago' : 'pendente'
+      })) || []);
+    };
+    
+    fetchTransactions();
+  }, [cardId]);
+
   // Exemplo de transações mockadas
-  const transactions: Transaction[] = [
-    {
-      id: 1,
-      descricao: 'Supermercado Extra',
-      valor: 250.90,
-      data: '2024-03-15',
-      categoria: 'Alimentação',
-      status: 'pago'
-    },
-    {
-      id: 2,
-      descricao: 'Netflix',
-      valor: 39.90,
-      data: '2024-03-10',
-      categoria: 'Entretenimento',
-      status: 'pendente'
-    },
-    {
-      id: 3,
-      descricao: 'Uber',
-      valor: 45.50,
-      data: '2024-03-14',
-      categoria: 'Transporte',
-      status: 'pago'
-    }
-  ];
+  // const mockTransactions: Transaction[] = [
+  //   {
+  //     id: 1,
+  //     descricao: 'Supermercado Extra',
+  //     valor: 250.90,
+  //     data: '2024-03-15',
+  //     categoria: 'Alimentação',
+  //     status: 'pago'
+  //   },
+  //   {
+  //     id: 2,
+  //     descricao: 'Netflix',
+  //     valor: 39.90,
+  //     data: '2024-03-10',
+  //     categoria: 'Entretenimento',
+  //     status: 'pendente'
+  //   },
+  //   {
+  //     id: 3,
+  //     descricao: 'Uber',
+  //     valor: 45.50,
+  //     data: '2024-03-14',
+  //     categoria: 'Transporte',
+  //     status: 'pago'
+  //   }
+  // ];
 
   return (
     <div className="mt-8 bg-gray-800 rounded-xl p-6">

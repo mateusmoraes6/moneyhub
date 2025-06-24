@@ -1,15 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { IMaskInput } from 'react-imask';
 
-interface CardFormValues {
-  nome_banco: string;
-  icone_url: string;
-  apelido: string;
-  limite_total: number;
-  limite_disponivel: number;
-  data_fechamento: number | undefined;
-  data_vencimento: number | undefined;
-}
+import { CardFormValues } from '../types/card';
 
 interface CreditCardFormModalProps {
   isOpen: boolean;
@@ -33,11 +24,10 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
   const [form, setForm] = useState<CardFormValues>(initialValues || {
     nome_banco: '',
     icone_url: '',
-    apelido: '',
     limite_total: 0,
     limite_disponivel: 0,
-    data_fechamento: undefined,
-    data_vencimento: undefined,
+    data_fechamento: 1,
+    data_vencimento: 15,
   });
 
   const [showBankSelector, setShowBankSelector] = useState(false);
@@ -59,11 +49,11 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
   }, [initialValues]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     setForm(prev => ({
       ...prev,
-      [name]: type === 'number' ? (value === '' ? undefined : Number(value)) : value,
+      [name]: name.includes('limite') || name.includes('data') ? (value === '' ? 0 : Number(value)) : value,
     }));
   };
 
@@ -86,7 +76,7 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome_banco || !form.apelido || form.limite_total === undefined || form.limite_disponivel === undefined || form.data_fechamento === undefined || form.data_vencimento === undefined) {
+    if (!form.nome_banco || form.limite_total === undefined || form.limite_disponivel === undefined || form.data_fechamento === undefined || form.data_vencimento === undefined) {
         alert('Por favor, preencha todos os campos obrigatórios.');
         return;
     }
@@ -104,11 +94,10 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
     setForm({
       nome_banco: '',
       icone_url: '',
-      apelido: '',
       limite_total: 0,
       limite_disponivel: 0,
-      data_fechamento: undefined,
-      data_vencimento: undefined,
+      data_fechamento: 1,
+      data_vencimento: 1,
     });
   };
 
@@ -180,45 +169,18 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
             </div>
           </div>
 
-          {/* Campo Apelido */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Apelido <span className="text-red-500">*</span>
-            </label>
-            <input
-              ref={firstInputRef}
-              type="text"
-              name="apelido"
-              value={form.apelido}
-              onChange={handleChange}
-              placeholder="Ex.: Cartão Principal, Cartão de Viagem..."
-              className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            />
-          </div>
-
           {/* Campos de Limite */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-300">
                 Limite Total <span className="text-red-500">*</span>
               </label>
-              <IMaskInput
-                mask="R$ num"
-                blocks={{
-                  num: {
-                    mask: Number,
-                    thousandsSeparator: '.',
-                    radix: ',',
-                    scale: 2,
-                    padFractionalZeros: true,
-                    normalizeZeros: true,
-                    min: 0
-                  }
-                }}
-                value={form.limite_total.toString()}
-                onAccept={(value) => handleCurrencyChange('limite_total', value)}
-                placeholder="R$ 0,00"
+              <input
+                type="text"
+                name="limite_total"
+                value={form.limite_total === 0 ? '' : form.limite_total.toString()}
+                onChange={handleChange}
+                placeholder="Ex.: 0,00"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
@@ -228,22 +190,12 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               <label className="block text-sm font-medium text-gray-300">
                 Limite Disponível <span className="text-red-500">*</span>
               </label>
-              <IMaskInput
-                mask="R$ num"
-                blocks={{
-                  num: {
-                    mask: Number,
-                    thousandsSeparator: '.',
-                    radix: ',',
-                    scale: 2,
-                    padFractionalZeros: true,
-                    normalizeZeros: true,
-                    min: 0
-                  }
-                }}
-                value={form.limite_disponivel.toString()}
-                onAccept={(value) => handleCurrencyChange('limite_disponivel', value)}
-                placeholder="R$ 0,00"
+              <input
+                type="text"
+                name="limite_disponivel"
+                value={form.limite_disponivel === 0 ? '' : form.limite_disponivel.toString()}
+                onChange={handleChange}
+                placeholder="Ex.: 0,00"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
@@ -257,13 +209,11 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
                 Dia de Fechamento <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="text"
                 name="data_fechamento"
-                value={form.data_fechamento === undefined ? '' : form.data_fechamento}
+                value={form.data_fechamento === 1 ? '' : form.data_fechamento.toString()}
                 onChange={handleChange}
-                min={1}
-                max={31}
-                placeholder="1 a 31"
+                placeholder="Ex.: 5"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
@@ -274,13 +224,11 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
                 Dia de Vencimento <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                type="text"
                 name="data_vencimento"
-                value={form.data_vencimento === undefined ? '' : form.data_vencimento}
+                value={form.data_vencimento === 15 ? '' : form.data_vencimento.toString()}
                 onChange={handleChange}
-                min={1}
-                max={31}
-                placeholder="1 a 31"
+                placeholder="Ex.: 15"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />

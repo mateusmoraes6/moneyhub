@@ -5,14 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import AccountDetailsModal from '../../features/bank-accounts/modals/AccountDetailsModal';
 import AddAccountModal from '../../features/bank-accounts/modals/AddAccountModal';
 import AccountList from '../../features/bank-accounts/components/AccountList/AccountList';
-import { useBankAccounts } from '../../features/bank-accounts/hooks/useBankAccounts';
 import { useCurrencyFormat } from '../../features/bank-accounts/hooks/useCurrencyFormat';
 import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountModals';
-import { BankAccountDetails } from '../../features/bank-accounts/data/mockAccounts'
+import { useAccounts } from '../../context/AccountsContext';
+import { Account } from '../../features/bank-accounts/types/account';
+import { BankAccountSummary } from '../../types/index';
 
 const BankAccounts: React.FC = () => {
   const navigate = useNavigate();
-  const { accounts, handleDelete, handleAddAccount, handleUpdateAccount } = useBankAccounts();
+  const { accounts, addAccount, updateAccount, deleteAccount, loading } = useAccounts();
   const { formatCurrency } = useCurrencyFormat();
   const {
     selectedAccount,
@@ -24,11 +25,52 @@ const BankAccounts: React.FC = () => {
     closeAddAccount
   } = useAccountModals();
 
-  const totalBalance = accounts.reduce((acc, account) => acc + account.saldo, 0);
+  const totalBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
 
-  const handleEditAccount = (account: BankAccountDetails) => {
-    handleUpdateAccount(account);
+  const handleAddAccount = async (accountData: Omit<BankAccountSummary, 'id' | 'created_at'>) => {
+    try {
+      await addAccount(accountData);
+      closeAddAccount();
+    } catch (error) {
+      console.error('Erro ao adicionar conta:', error);
+    }
   };
+
+  const handleUpdateAccount = async (account: Account) => {
+    try {
+      // Mapear apenas os campos válidos para o banco de dados
+      const accountData: Partial<BankAccountSummary> = {
+        bank_name: account.nome_banco,
+        balance: account.saldo,
+        // type: 'checking', // ou pegar de algum lugar se necessário
+      };
+      
+      await updateAccount(account.id, accountData);
+    } catch (error) {
+      console.error('Erro ao atualizar conta:', error);
+    }
+  };
+
+  const handleDeleteAccount = async (account: Account) => {
+    if (window.confirm('Tem certeza que deseja excluir esta conta?')) {
+      try {
+        await deleteAccount(account.id);
+      } catch (error) {
+        console.error('Erro ao deletar conta:', error);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
+          <p className="mt-4">Carregando contas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
@@ -72,9 +114,16 @@ const BankAccounts: React.FC = () => {
           </div>
 
           <AccountList
-            accounts={accounts}
-            onEdit={handleEditAccount}
-            onDelete={handleDelete}
+            accounts={accounts.map(acc => ({
+              ...acc,
+              nome_banco: acc.bank_name,
+              numero_conta: '', // coloque um valor padrão ou ajuste conforme necessário
+              icone_url: '',    // coloque um valor padrão ou ajuste conforme necessário
+              saldo: acc.balance,
+              historico_saldo: [], // coloque um valor padrão ou ajuste conforme necessário
+            }))}
+            onEdit={handleUpdateAccount}
+            onDelete={handleDeleteAccount}
             onViewDetails={openAccountDetails}
           />
         </div>

@@ -20,19 +20,19 @@ const TransactionForm: React.FC = () => {
   };
 
   const mapAccountToSelector = (account: BankAccountSummary) => ({
-    id: account.id.toString(),
-    nome_banco: account.bank,
-    numero_conta: account.type,
-    icone_url: `/icons/${normalizeBankName(account.bank)}.svg`,
+    id: account.id,
+    nome_banco: account.bank_name,
+    // numero_conta: account.type,
+    icone_url: `/icons/${normalizeBankName(account.bank_name)}.svg`,
     saldo: account.balance,
     historico_saldo: []
   });
 
   const mapCardToSelector = (card: Card) => ({
     id: card.id,
-    nome_banco: card.bank,
-    icone_url: `/icons/${normalizeBankName(card.bank)}.svg`,
-    apelido: card.name,
+    nome_banco: card.bank_name,
+    icone_url: `/icons/${normalizeBankName(card.bank_name)}.svg`,
+    // apelido: card.name,
     limite_total: card.limit,
     limite_disponivel: card.available_limit,
     data_fechamento: card.closing_day,
@@ -53,7 +53,8 @@ const TransactionForm: React.FC = () => {
   const [category, setCategory] = useState('');
   const [accountId, setAccountId] = useState<number | string | undefined>(undefined);
   const [cardId, setCardId] = useState<number | string | undefined>(undefined);
-  const [installments, setInstallments] = useState<number>(1);
+  const [installmentId, setInstallmentId] = useState<string | undefined>(undefined);
+  const [installmentNum, setInstallmentNum] = useState<number>(1);
 
   const resetForm = () => {
     setDescription('');
@@ -65,13 +66,14 @@ const TransactionForm: React.FC = () => {
     setCategory('');
     setAccountId(undefined);
     setCardId(undefined);
-    setInstallments(1);
+    setInstallmentId(undefined);
+    setInstallmentNum(1);
   };
 
   useEffect(() => {
     if (paymentMethod === 'pix_debit') {
       setCardId(undefined);
-      setInstallments(1);
+      setInstallmentNum(1);
     } else {
       setAccountId(undefined);
     }
@@ -135,10 +137,11 @@ const TransactionForm: React.FC = () => {
         type,
         date,
         payment_method: paymentMethod,
-        category,
+        category_id: category,
         account_id: paymentMethod === 'pix_debit' ? (accountId as number | undefined) : undefined,
         card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
-        installments: paymentMethod === 'credit' ? installments : undefined,
+        installment_id: paymentMethod === 'credit' ? installmentId : undefined,
+        installment_num: paymentMethod === 'credit' ? installmentNum : undefined,
         status: 'pending',
       });
 
@@ -374,7 +377,7 @@ const TransactionForm: React.FC = () => {
                   {paymentMethod === 'pix_debit' ? (
                     <AccountSelector
                       accounts={accounts.map(mapAccountToSelector)}
-                      selectedId={accountId?.toString()}
+                      selectedId={typeof accountId === 'string' ? parseInt(accountId) : accountId}
                       onSelect={setAccountId}
                     />
                   ) : (

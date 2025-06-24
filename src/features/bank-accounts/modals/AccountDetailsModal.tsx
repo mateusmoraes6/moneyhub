@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { X, AlertCircle, PiggyBank } from 'lucide-react';
-import { BankAccountDetails } from '../data/mockAccounts';
+import { Account } from '../types/account';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface AccountDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  account: BankAccountDetails;
+  account: Account;
 }
 
 const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClose, account }) => {
@@ -52,7 +52,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
 
   // Função para determinar o status da saúde financeira
   const getSaudeFinanceiraStatus = (taxaEndividamento: number, taxaPoupanca: number, saldo: number) => {
-    // Se o saldo for negativo, automaticamente é crítico
     if (saldo < 0) {
       return { 
         status: 'Crítico', 
@@ -60,8 +59,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
         descricao: 'Seu saldo está negativo. Priorize o pagamento de dívidas e reduza gastos não essenciais.' 
       };
     }
-
-    // Se a taxa de endividamento for muito alta
     if (taxaEndividamento > 80) {
       return { 
         status: 'Atenção', 
@@ -69,8 +66,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
         descricao: 'Suas despesas estão muito altas em relação às receitas. Considere revisar seus gastos.' 
       };
     }
-
-    // Se a taxa de endividamento for alta
     if (taxaEndividamento > 60) {
       return { 
         status: 'Regular', 
@@ -78,8 +73,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
         descricao: 'Suas despesas estão altas. Procure reduzir gastos não essenciais.' 
       };
     }
-
-    // Se a taxa de poupança for boa
     if (taxaPoupanca > 20) {
       return { 
         status: 'Excelente', 
@@ -87,8 +80,6 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
         descricao: 'Você está poupando bem! Continue assim!' 
       };
     }
-
-    // Situação regular
     return { 
       status: 'Regular', 
       cor: 'text-blue-400', 

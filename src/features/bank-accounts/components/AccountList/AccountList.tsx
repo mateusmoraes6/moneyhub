@@ -1,12 +1,12 @@
 import React from 'react';
-import { BankAccountDetails } from '../../data/mockAccounts';
+import { Account } from '../../types/account';
 import AccountCard from '../AccountCard/AccountCard';
 
 interface AccountListProps {
-  accounts: BankAccountDetails[];
-  onEdit: (account: BankAccountDetails) => void;
-  onDelete: (account: BankAccountDetails) => void;
-  onViewDetails: (account: BankAccountDetails) => void;
+  accounts: Account[];
+  onEdit: (account: Account) => void;
+  onDelete: (account: Account) => void;
+  onViewDetails: (account: Account) => void;
 }
 
 const AccountList: React.FC<AccountListProps> = ({

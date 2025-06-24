@@ -17,8 +17,11 @@ interface TransactionsContextType {
   error: string | null;
   summary: TransactionSummary;
   isAuthenticated: boolean;
+  user: any;
   lastAction: string | null;
   setLastAction: React.Dispatch<React.SetStateAction<string | null>>;
+  categories: any[];
+  fetchCategories: () => Promise<void>;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
@@ -28,16 +31,21 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [lastAction, setLastAction] = useState<string | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setIsAuthenticated(!!session);
+      setUser(session?.user ?? null);
       if (session) {
         fetchTransactions();
+        fetchCategories();
       } else {
         setTransactions([]);
+        setCategories([]);
         setLoading(false);
       }
     });
@@ -76,6 +84,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -172,6 +181,25 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, initialSummary);
   }, [transactions]);
 
+  const fetchCategories = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setCategories([]);
+        return;
+      }
+      const { data, error } = await (supabase as any)
+        .from('categories')
+        .select('*')
+        .eq('user_id', user.id);
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar categorias:', err);
+      setCategories([]);
+    }
+  };
+
   return (
     <TransactionsContext.Provider value={{ 
       transactions, 
@@ -182,8 +210,11 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       error, 
       summary,
       isAuthenticated,
+      user,
       lastAction,
       setLastAction,
+      categories,
+      fetchCategories,
     }}>
       {children}
     </TransactionsContext.Provider>

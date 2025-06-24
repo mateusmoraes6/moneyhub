@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { BankAccountDetails } from '../data/mockAccounts';
+import { Account } from '../types/account';
 import { banks } from '../data/banks';
 
 interface EditAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (account: BankAccountDetails) => void;
-  account: BankAccountDetails;
+  onSave: (account: Account) => void;
+  account: Account;
 }
 
 const EditAccountModal: React.FC<EditAccountModalProps> = ({ isOpen, onClose, onSave, account }) => {
@@ -26,11 +26,11 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({ isOpen, onClose, on
     });
   }, [account]);
 
-  const handleSelectBank = (bank: typeof banks[0]) => {
+  const handleSelectBank = (bank_name: typeof banks[0]) => {
     setForm(prev => ({
       ...prev,
-      nome_banco: bank.nome,
-      icone_url: bank.icone,
+      nome_banco: bank_name.nome,
+      icone_url: bank_name.icone,
     }));
     setShowBankSelector(false);
   };

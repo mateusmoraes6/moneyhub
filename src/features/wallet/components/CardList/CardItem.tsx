@@ -98,7 +98,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
             size="md"
           />
           <div>
-            <h3 className="text-lg font-semibold text-white">{card.apelido}</h3>
+            {/* <h3 className="text-lg font-semibold text-white">{card.apelido}</h3> */}
             <p className="text-sm text-gray-400">{card.nome_banco}</p>
           </div>
         </div>

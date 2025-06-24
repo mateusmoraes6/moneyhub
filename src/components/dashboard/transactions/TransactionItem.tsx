@@ -30,7 +30,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
       amount: amountValue,
       type: editedType,
       date: editedDate,
-      category: transaction.category,
+      category_id: transaction.category_id,
       payment_method: transaction.payment_method,
       status: transaction.status,
     });

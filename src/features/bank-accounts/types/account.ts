@@ -1,7 +1,7 @@
 export interface Account {
-  id: string;
+  id: number;
   nome_banco: string;
-  numero_conta: string;
+  // numero_conta: string;
   icone_url: string;
   saldo: number;
   receitas_mes?: number;
