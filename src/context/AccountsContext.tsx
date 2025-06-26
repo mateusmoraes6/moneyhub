@@ -216,6 +216,8 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [fetchAccounts]);
 
+  const totalBalance = accounts.reduce((acc, account) => acc + Number(account.balance), 0);
+
   const value = {
     accounts,
     cards,
@@ -227,7 +229,8 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     getAccountById,
     getCardById,
     loading,
-    error
+    error,
+    totalBalance
   };
 
   return (

@@ -4,15 +4,19 @@ import FinancialSummary from '../../components/dashboard/summary/FinancialSummar
 import TransactionForm from '../../components/dashboard/transactions/TransactionForm';
 import TransactionHistory from '../../components/dashboard/transactions/TransactionHistory';
 import ExpenseIncomeChart from '../../components/dashboard/charts/ExpenseIncomeChart';
+import { useAccounts } from '../../context/AccountsContext';
 
 const Dashboard: React.FC = () => {
+  const { accounts } = useAccounts();
+  const totalBalance = accounts.reduce((acc, account) => acc + Number(account.balance), 0);
+
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
       <Header />
       
       <main className="container mt-12 pt-16 mx-auto px-4 py-6 max-w-3xl">
         <div className="space-y-6">
-          <FinancialSummary />
+          <FinancialSummary totalBalance={totalBalance} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">

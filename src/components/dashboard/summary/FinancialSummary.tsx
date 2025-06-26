@@ -3,19 +3,19 @@ import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { useTransactions } from '../../../context/TransactionsContext';
 import { formatCurrency } from '../../../utils/formatters';
 
-const FinancialSummary: React.FC = () => {
+const FinancialSummary: React.FC<{ totalBalance: number }> = ({ totalBalance }) => {
   const { summary, loading } = useTransactions();
   
   // Determine if we should show a motivational message
-  const getMotivationalMessage = () => {
-    if (summary.balance > 0) {
-      return "Ótimo trabalho! Seus ganhos estão superando seus gastos.";
-    } else if (summary.balance === 0) {
-      return "Suas finanças estão equilibradas.";
-    } else {
-      return "Atenção! Seus gastos estão superando seus ganhos.";
-    }
-  };
+  // const getMotivationalMessage = () => {
+  //   if (summary.balance > 0) {
+  //     return "Ótimo trabalho! Seus ganhos estão superando seus gastos.";
+  //   } else if (summary.balance === 0) {
+  //     return "Suas finanças estão equilibradas.";
+  //   } else {
+  //     return "Atenção! Seus gastos estão superando seus ganhos.";
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -43,21 +43,18 @@ const FinancialSummary: React.FC = () => {
   return (
     <section className="w-full dark:bg-gray-900 rounded-xl shadow-sm p-4 md:p-6 transition-all duration-300">
       <div className="space-y-6">
-        {/* Balance */}
-        <div className="text-center">
-          <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Saldo Atual</h2>
+        {/* Saldo total das contas */}
+        <div className="text-center mb-4">
+          <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Saldo Total</h2>
           <div className={`text-3xl md:text-4xl font-bold transition-colors duration-300 ${
-            summary.balance > 0 
+            totalBalance > 0 
               ? 'text-emerald-500' 
-              : summary.balance < 0 
+              : totalBalance < 0 
                 ? 'text-red-500' 
                 : 'text-gray-700 dark:text-gray-300'
           }`}>
-            {formatCurrency(summary.balance)}
+            {formatCurrency(totalBalance)}
           </div>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {getMotivationalMessage()}
-          </p>
         </div>
 
         {/* Income & Expenses */}

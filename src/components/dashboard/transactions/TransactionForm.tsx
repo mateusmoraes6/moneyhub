@@ -8,7 +8,7 @@ import CardSelector from '../../../features/wallet/components/CardSelector/CardS
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
-  const { accounts, cards, updateCardLimit } = useAccounts();
+  const { accounts, cards, updateCardLimit, updateAccount } = useAccounts();
 
   // Função auxiliar para normalizar o nome do banco
   const normalizeBankName = (name: string) => {
@@ -51,7 +51,7 @@ const TransactionForm: React.FC = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix_debit');
   const [category, setCategory] = useState('');
-  const [accountId, setAccountId] = useState<number | string | undefined>(undefined);
+  const [accountId, setAccountId] = useState<number | undefined>(undefined);
   const [cardId, setCardId] = useState<number | string | undefined>(undefined);
   const [installmentId, setInstallmentId] = useState<string | undefined>(undefined);
   const [installmentNum, setInstallmentNum] = useState<number>(1);
@@ -148,6 +148,16 @@ const TransactionForm: React.FC = () => {
       // Atualizar limite do cartão se for transação de crédito
       if (paymentMethod === 'credit' && typeof cardId === 'number') {
         await updateCardLimit(cardId, amountValue);
+      }
+
+      if (paymentMethod === 'pix_debit' && accountId) {
+        const selectedAccount = accounts.find(acc => acc.id === Number(accountId));
+        if (selectedAccount) {
+          const newBalance = type === 'expense'
+            ? selectedAccount.balance - amountValue
+            : selectedAccount.balance + amountValue;
+          await updateAccount(selectedAccount.id, { balance: newBalance });
+        }
       }
 
       resetForm();
@@ -377,8 +387,8 @@ const TransactionForm: React.FC = () => {
                   {paymentMethod === 'pix_debit' ? (
                     <AccountSelector
                       accounts={accounts.map(mapAccountToSelector)}
-                      selectedId={typeof accountId === 'string' ? parseInt(accountId) : accountId}
-                      onSelect={setAccountId}
+                      selectedId={accountId}
+                      onSelect={id => setAccountId(id)}
                     />
                   ) : (
                     <CardSelector
