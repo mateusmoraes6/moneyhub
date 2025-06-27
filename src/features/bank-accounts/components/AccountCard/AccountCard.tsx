@@ -41,7 +41,7 @@ const AccountCard: React.FC<AccountCardProps> = ({
             <BankIcon
               iconUrl={account.icone_url}
               bankName={account.nome_banco}
-              size="lg"
+              size="md"
             />
             <div>
               <h3 className="text-lg font-semibold text-white">{account.nome_banco}</h3>

@@ -61,6 +61,14 @@ const BankAccounts: React.FC = () => {
     }
   };
 
+  const normalizeBankName = (name: string) => {
+    return name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s/g, "");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -117,10 +125,10 @@ const BankAccounts: React.FC = () => {
             accounts={accounts.map(acc => ({
               ...acc,
               nome_banco: acc.bank_name,
-              numero_conta: '', // coloque um valor padrão ou ajuste conforme necessário
-              icone_url: '',    // coloque um valor padrão ou ajuste conforme necessário
+              numero_conta: '',
+              icone_url: `/icons/${normalizeBankName(acc.bank_name)}.svg`,
               saldo: acc.balance,
-              historico_saldo: [], // coloque um valor padrão ou ajuste conforme necessário
+              historico_saldo: [],
             }))}
             onEdit={handleUpdateAccount}
             onDelete={handleDeleteAccount}
