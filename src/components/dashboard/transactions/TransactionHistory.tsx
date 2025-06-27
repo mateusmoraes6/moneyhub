@@ -19,6 +19,7 @@ const TransactionHistory: React.FC = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
   const ITEMS_PER_PAGE = 5;
 
@@ -192,72 +193,81 @@ const TransactionHistory: React.FC = () => {
                 </div>
               </div>
 
-              {/* Filtro por período */}
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Selecione um mês
-                  </label>
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => {
-                      setSelectedMonth(e.target.value);
-                      // Limpar o intervalo de datas se um mês for selecionado
-                      if (e.target.value) {
-                        setStartDate('');
-                        setEndDate('');
-                      }
-                      setCurrentPage(1);
-                    }}
-                    className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
-                  >
-                    <option value="">Todos os meses</option>
-                    {getMonthOptions().map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Botão para mostrar/ocultar filtros avançados */}
+              <button
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                className="mt-3 text-sm text-gray-400 hover:text-white flex items-center"
+                type="button"
+              >
+                <Filter className="w-4 h-4 mr-1" />
+                {showAdvancedFilters ? 'Ocultar filtros avançados' : 'Filtros avançados'}
+              </button>
 
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-400 mb-1">
-                        De
-                      </label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => {
-                          setStartDate(e.target.value);
-                          // Limpar o mês selecionado
-                          if (e.target.value) setSelectedMonth('');
-                          setCurrentPage(1);
-                        }}
-                        className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-400 mb-1">
-                        Até
-                      </label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => {
-                          setEndDate(e.target.value);
-                          // Limpar o mês selecionado
-                          if (e.target.value) setSelectedMonth('');
-                          setCurrentPage(1);
-                        }}
-                        min={startDate}
-                        className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
-                      />
+              {/* Filtros avançados (mês e data) */}
+              {showAdvancedFilters && (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Selecione um mês
+                    </label>
+                    <select
+                      value={selectedMonth}
+                      onChange={(e) => {
+                        setSelectedMonth(e.target.value);
+                        if (e.target.value) {
+                          setStartDate('');
+                          setEndDate('');
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
+                    >
+                      <option value="">Todos os meses</option>
+                      {getMonthOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-400 mb-1">
+                          De
+                        </label>
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => {
+                            setStartDate(e.target.value);
+                            if (e.target.value) setSelectedMonth('');
+                            setCurrentPage(1);
+                          }}
+                          className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-400 mb-1">
+                          Até
+                        </label>
+                        <input
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => {
+                            setEndDate(e.target.value);
+                            if (e.target.value) setSelectedMonth('');
+                            setCurrentPage(1);
+                          }}
+                          min={startDate}
+                          className="w-full p-2 border border-gray-700 rounded-lg bg-gray-800 text-white"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Botão para limpar filtros */}
               {(filterType || searchQuery || startDate || endDate || selectedMonth) && (
