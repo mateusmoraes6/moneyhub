@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Header from '../../components/layout/Header';
 import { Building2, Plus } from 'lucide-react';
 import AccountDetailsModal from '../../features/bank-accounts/modals/AccountDetailsModal';
@@ -9,6 +9,14 @@ import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountM
 import { useAccounts } from '../../context/AccountsContext';
 import { Account } from '../../features/bank-accounts/types/account';
 import { BankAccountSummary } from '../../types/index';
+
+const normalizeBankName = (name: string) => {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s/g, "");
+};
 
 const BankAccounts: React.FC = () => {
   const { accounts, addAccount, updateAccount, deleteAccount, loading } = useAccounts();
@@ -23,7 +31,22 @@ const BankAccounts: React.FC = () => {
     closeAddAccount
   } = useAccountModals();
 
-  const totalBalance = accounts.reduce((acc, account) => acc + account.balance, 0);
+  const totalBalance = useMemo(
+    () => accounts.reduce((acc, account) => acc + account.balance, 0),
+    [accounts]
+  );
+
+  const formattedAccounts = useMemo(
+    () => accounts.map(acc => ({
+      ...acc,
+      nome_banco: acc.bank_name,
+      numero_conta: '',
+      icone_url: `/icons/${normalizeBankName(acc.bank_name)}.svg`,
+      saldo: acc.balance,
+      historico_saldo: [],
+    })),
+    [accounts]
+  );
 
   const handleAddAccount = async (accountData: Omit<BankAccountSummary, 'id' | 'created_at'>) => {
     try {
@@ -57,14 +80,6 @@ const BankAccounts: React.FC = () => {
         console.error('Erro ao deletar conta:', error);
       }
     }
-  };
-
-  const normalizeBankName = (name: string) => {
-    return name
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/\s/g, "");
   };
 
   if (loading) {
@@ -101,14 +116,7 @@ const BankAccounts: React.FC = () => {
           </div>
 
           <AccountList
-            accounts={accounts.map(acc => ({
-              ...acc,
-              nome_banco: acc.bank_name,
-              numero_conta: '',
-              icone_url: `/icons/${normalizeBankName(acc.bank_name)}.svg`,
-              saldo: acc.balance,
-              historico_saldo: [],
-            }))}
+            accounts={formattedAccounts}
             onEdit={handleUpdateAccount}
             onDelete={handleDeleteAccount}
             onViewDetails={openAccountDetails}
