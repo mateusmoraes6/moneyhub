@@ -9,6 +9,7 @@ import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountM
 import { useAccounts } from '../../context/AccountsContext';
 import { Account } from '../../features/bank-accounts/types/account';
 import { BankAccountSummary } from '../../types/index';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const normalizeBankName = (name: string) => {
   return name
@@ -30,6 +31,12 @@ const BankAccounts: React.FC = () => {
     openAddAccount,
     closeAddAccount
   } = useAccountModals();
+
+  const [accountToDelete, setAccountToDelete] = React.useState<Account | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+  // const [accountToEdit, setAccountToEdit] = React.useState<Account | null>(null);
+  const [pendingEditData, setPendingEditData] = React.useState<Account | null>(null);
+  const [isEditConfirmOpen, setIsEditConfirmOpen] = React.useState(false);
 
   const totalBalance = useMemo(
     () => accounts.reduce((acc, account) => acc + account.balance, 0),
@@ -57,28 +64,42 @@ const BankAccounts: React.FC = () => {
     }
   };
 
-  const handleUpdateAccount = async (account: Account) => {
-    try {
-      // Mapear apenas os campos válidos para o banco de dados
-      const accountData: Partial<BankAccountSummary> = {
-        bank_name: account.nome_banco,
-        balance: account.saldo,
-        // type: 'checking', // ou pegar de algum lugar se necessário
-      };
-      
-      await updateAccount(account.id, accountData);
-    } catch (error) {
-      console.error('Erro ao atualizar conta:', error);
-    }
+  const handleUpdateAccount = (account: Account) => {
+    // setAccountToEdit(account);
+    setPendingEditData(account);
+    setIsEditConfirmOpen(true);
   };
 
-  const handleDeleteAccount = async (account: Account) => {
-    if (window.confirm('Tem certeza que deseja excluir esta conta?')) {
+  const handleDeleteAccount = (account: Account) => {
+    setAccountToDelete(account);
+    setIsConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (accountToDelete) {
       try {
-        await deleteAccount(account.id);
+        await deleteAccount(accountToDelete.id);
       } catch (error) {
         console.error('Erro ao deletar conta:', error);
       }
+      setIsConfirmOpen(false);
+      setAccountToDelete(null);
+    }
+  };
+
+  const confirmEdit = async () => {
+    if (pendingEditData) {
+      try {
+        const accountData: Partial<BankAccountSummary> = {
+          bank_name: pendingEditData.nome_banco,
+          balance: pendingEditData.saldo,
+        };
+        await updateAccount(pendingEditData.id, accountData);
+      } catch (error) {
+        console.error('Erro ao atualizar conta:', error);
+      }
+      setIsEditConfirmOpen(false);
+      setPendingEditData(null);
     }
   };
 
@@ -96,7 +117,7 @@ const BankAccounts: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-950 transition-colors duration-300">
       <Header />
-      
+
       <main className="container mt-12 pt-16 mx-auto px-4 py-6 max-w-4xl">
         <div className="space-y-6">
           <div className="flex items-center space-x-3">
@@ -108,10 +129,10 @@ const BankAccounts: React.FC = () => {
 
           <div className="flex justify-between items-center">
             {/* <div className="text-left"> */}
-              <p className="text-sm text-gray-400">Saldo Total</p>
-              <p className="text-xl font-bold text-emerald-400">
-                {formatCurrency(totalBalance)}
-              </p>
+            <p className="text-sm text-gray-400">Saldo Total</p>
+            <p className="text-xl font-bold text-emerald-400">
+              {formatCurrency(totalBalance)}
+            </p>
             {/* </div> */}
           </div>
 
@@ -124,7 +145,7 @@ const BankAccounts: React.FC = () => {
         </div>
 
         <div className="flex justify-center mt-8">
-          <button 
+          <button
             onClick={openAddAccount}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium text-sm flex items-center gap-2 shadow"
           >
@@ -145,6 +166,22 @@ const BankAccounts: React.FC = () => {
           isOpen={isAddModalOpen}
           onClose={closeAddAccount}
           onSave={handleAddAccount}
+        />
+
+        <ConfirmModal
+          isOpen={isConfirmOpen}
+          title="Confirmar Exclusão"
+          description="Tem certeza que deseja excluir esta conta?"
+          onConfirm={confirmDelete}
+          onCancel={() => { setIsConfirmOpen(false); setAccountToDelete(null); }}
+        />
+
+        <ConfirmModal
+          isOpen={isEditConfirmOpen}
+          title="Confirmar Edição"
+          description="Tem certeza que deseja modificar as informações desta conta bancária?"
+          onConfirm={confirmEdit}
+          onCancel={() => { setIsEditConfirmOpen(false); setPendingEditData(null); }}
         />
       </main>
     </div>
