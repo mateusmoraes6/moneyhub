@@ -19,18 +19,17 @@ const ExpenseIncomeChart: React.FC = () => {
   });
 
   useEffect(() => {
-    // Agrupar transações por mês
+    // Agrupar transações por mês do ano atual
     const groupedByMonth: Record<string, { income: number; expense: number }> = {};
-    
-    // Processar os últimos 6 meses
-    const today = new Date();
-    for (let i = 0; i < 6; i++) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+
+    const currentYear = new Date().getFullYear();
+    // Gerar todos os meses do ano atual
+    for (let m = 0; m < 12; m++) {
+      const date = new Date(currentYear, m, 1);
       const monthKey = date.toISOString().slice(0, 7); // formato YYYY-MM
-      
       groupedByMonth[monthKey] = { income: 0, expense: 0 };
     }
-    
+
     // Somar transações por mês e tipo
     transactions.forEach(transaction => {
       const monthKey = transaction.date.slice(0, 7);
@@ -42,19 +41,20 @@ const ExpenseIncomeChart: React.FC = () => {
         }
       }
     });
-    
-    // Preparar dados para o gráfico (últimos 6 meses em ordem cronológica)
+
+    // Preparar dados para o gráfico (todos os meses do ano em ordem cronológica)
     const sortedMonths = Object.keys(groupedByMonth)
       .sort((a, b) => a.localeCompare(b));
-    
+
     const labels = sortedMonths.map(monthKey => {
-      const date = new Date(monthKey);
+      const [year, month] = monthKey.split('-').map(Number);
+      const date = new Date(year, month - 1);
       return date.toLocaleDateString('pt-BR', { month: 'short' });
     });
-    
+
     const incomes = sortedMonths.map(month => groupedByMonth[month].income);
     const expenses = sortedMonths.map(month => groupedByMonth[month].expense);
-    
+
     setMonthlyData({ labels, incomes, expenses });
   }, [transactions]);
 

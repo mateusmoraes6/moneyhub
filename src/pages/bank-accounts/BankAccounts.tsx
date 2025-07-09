@@ -7,9 +7,12 @@ import AccountList from '../../features/bank-accounts/components/AccountList/Acc
 import { useCurrencyFormat } from '../../features/bank-accounts/hooks/useCurrencyFormat';
 import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountModals';
 import { useAccounts } from '../../context/AccountsContext';
+import { useTransactions } from '../../context/TransactionsContext';
+import { useAccountDetails } from '../../features/bank-accounts/hooks/useAccountDetails';
 import { Account } from '../../features/bank-accounts/types/account';
 import { BankAccountSummary } from '../../types/index';
 import ConfirmModal from '../../components/common/ConfirmModal';
+import { gerarHistoricoSaldo } from '../../features/bank-accounts/hooks/useAccountDetails';
 
 const normalizeBankName = (name: string) => {
   return name
@@ -32,6 +35,19 @@ const BankAccounts: React.FC = () => {
     closeAddAccount
   } = useAccountModals();
 
+  const { transactions } = useTransactions();
+
+  const selectedAccountData = selectedAccount
+    ? {
+        id: selectedAccount.id,
+        bank_name: selectedAccount.nome_banco,
+        balance: selectedAccount.saldo,
+        created_at: '',
+      }
+    : null;
+
+  const selectedAccountDetails = useAccountDetails(selectedAccountData, transactions);
+
   const [accountToDelete, setAccountToDelete] = React.useState<Account | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
   // const [accountToEdit, setAccountToEdit] = React.useState<Account | null>(null);
@@ -50,9 +66,9 @@ const BankAccounts: React.FC = () => {
       numero_conta: '',
       icone_url: `/icons/${normalizeBankName(acc.bank_name)}.svg`,
       saldo: acc.balance,
-      historico_saldo: [],
+      historico_saldo: gerarHistoricoSaldo(acc.id, transactions), // <-- Aqui está a mudança!
     })),
-    [accounts]
+    [accounts, transactions]
   );
 
   const handleAddAccount = async (accountData: Omit<BankAccountSummary, 'id' | 'created_at'>) => {
@@ -154,11 +170,11 @@ const BankAccounts: React.FC = () => {
           </button>
         </div>
 
-        {selectedAccount && (
+        {selectedAccountDetails && (
           <AccountDetailsModal
             isOpen={isModalOpen}
             onClose={closeAccountDetails}
-            account={selectedAccount}
+            account={selectedAccountDetails}
           />
         )}
 

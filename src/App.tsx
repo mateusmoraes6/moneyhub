@@ -11,10 +11,10 @@ import { AccountsProvider } from './context/AccountsContext';
 
 function App() {
   return (
-    <AccountsProvider>
-      <BrowserRouter>
-        <ThemeProvider>
-          <TransactionsProvider>
+    <TransactionsProvider>
+      <AccountsProvider>
+        <BrowserRouter>
+          <ThemeProvider>
             <Routes>
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/login" element={<Login />} />
@@ -44,10 +44,10 @@ function App() {
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </TransactionsProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </AccountsProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </AccountsProvider>
+    </TransactionsProvider>
   );
 }
 

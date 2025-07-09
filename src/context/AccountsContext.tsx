@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, AccountsContextType, BankAccountSummary } from '../types';
 import { supabase } from '../supabaseClient';
+import { useTransactions } from './TransactionsContext'; // ajuste o caminho se necessário
 
 const AccountsContext = createContext<AccountsContextType | undefined>(undefined);
 
@@ -9,6 +10,8 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { transactions } = useTransactions();
 
   // Buscar contas do Supabase
   const fetchAccounts = useCallback(async () => {
@@ -218,8 +221,61 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const totalBalance = accounts.reduce((acc, account) => acc + Number(account.balance), 0);
 
+  const enrichedAccounts = useMemo(() => {
+    const now = new Date();
+    const last30Days = new Date(now);
+    last30Days.setDate(now.getDate() - 30);
+
+    return accounts.map(account => {
+      // Filtra transações dessa conta
+      const accountTransactions = transactions.filter(
+        t => t.account_id === account.id
+      );
+
+      // Receitas e despesas dos últimos 30 dias
+      const receitas_mes = accountTransactions
+        .filter(t => t.type === 'income' && new Date(t.date) >= last30Days)
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      const despesas_mes = accountTransactions
+        .filter(t => t.type === 'expense' && new Date(t.date) >= last30Days)
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+      // Histórico mensal (exemplo: últimos 12 meses)
+      const historico_saldo: { data: string, valor: number, receitas: number, gastos: number }[] = [];
+      for (let i = 0; i < 12; i++) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthKey = date.toISOString().slice(0, 7);
+
+        const receitas = accountTransactions
+          .filter(t => t.type === 'income' && t.date.slice(0, 7) === monthKey)
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+
+        const gastos = accountTransactions
+          .filter(t => t.type === 'expense' && t.date.slice(0, 7) === monthKey)
+          .reduce((sum, t) => sum + Number(t.amount), 0);
+
+        // Saldo acumulado até o fim do mês
+        const saldo = account.balance // ou calcule a partir das transações, se preferir
+        historico_saldo.unshift({
+          data: monthKey,
+          valor: saldo, // pode ser ajustado para saldo acumulado até o mês
+          receitas,
+          gastos
+        });
+      }
+
+      return {
+        ...account,
+        receitas_mes,
+        despesas_mes,
+        historico_saldo
+      };
+    });
+  }, [accounts, transactions]);
+
   const value = {
-    accounts,
+    accounts: enrichedAccounts,
     cards,
     addAccount,
     updateAccount,
