@@ -76,7 +76,15 @@ const AccountCard: React.FC<AccountCardProps> = ({
             </div>
           </div>
 
-          <AccountChart historico={account.historico_saldo} />
+          {account.historico_saldo && account.historico_saldo.length > 0 ? (
+            <AccountChart historico={account.historico_saldo} />
+          ) : (
+            <div className="bg-gray-800 rounded-lg flex items-center justify-center h-32 my-4">
+              <span className="text-gray-400 text-center px-4">
+                O gráfico aparecerá aqui após a primeira transação.
+              </span>
+            </div>
+          )}
 
           {/* Botão ver detalhes */}
           <div className="mt-4 flex items-center justify-center text-sm">

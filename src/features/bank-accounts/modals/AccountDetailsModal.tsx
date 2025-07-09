@@ -24,10 +24,10 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
     const receitas = account.receitas_mes || 0;
     const despesas = account.despesas_mes || 0;
     const saldo = account.saldo;
-    
+
     // Taxa de poupança (quanto do dinheiro recebido foi poupado)
     const taxaPoupanca = receitas > 0 ? ((receitas - despesas) / receitas) * 100 : 0;
-    
+
     // Taxa de endividamento (quanto das receitas vai para despesas)
     const taxaEndividamento = receitas > 0 ? (despesas / receitas) * 100 : 0;
 
@@ -53,42 +53,42 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
   // Função para determinar o status da saúde financeira
   const getSaudeFinanceiraStatus = (taxaEndividamento: number, taxaPoupanca: number, saldo: number) => {
     if (saldo < 0) {
-      return { 
-        status: 'Crítico', 
-        cor: 'text-red-400', 
-        descricao: 'Seu saldo está negativo. Priorize o pagamento de dívidas e reduza gastos não essenciais.' 
+      return {
+        status: 'Crítico',
+        cor: 'text-red-400',
+        descricao: 'Seu saldo está negativo. Priorize o pagamento de dívidas e reduza gastos não essenciais.'
       };
     }
     if (taxaEndividamento > 80) {
-      return { 
-        status: 'Atenção', 
-        cor: 'text-yellow-400', 
-        descricao: 'Suas despesas estão muito altas em relação às receitas. Considere revisar seus gastos.' 
+      return {
+        status: 'Atenção',
+        cor: 'text-yellow-400',
+        descricao: 'Suas despesas estão muito altas em relação às receitas. Considere revisar seus gastos.'
       };
     }
     if (taxaEndividamento > 60) {
-      return { 
-        status: 'Regular', 
-        cor: 'text-blue-400', 
-        descricao: 'Suas despesas estão altas. Procure reduzir gastos não essenciais.' 
+      return {
+        status: 'Regular',
+        cor: 'text-blue-400',
+        descricao: 'Suas despesas estão altas. Procure reduzir gastos não essenciais.'
       };
     }
     if (taxaPoupanca > 20) {
-      return { 
-        status: 'Excelente', 
-        cor: 'text-emerald-400', 
-        descricao: 'Você está poupando bem! Continue assim!' 
+      return {
+        status: 'Excelente',
+        cor: 'text-emerald-400',
+        descricao: 'Você está poupando bem! Continue assim!'
       };
     }
-    return { 
-      status: 'Regular', 
-      cor: 'text-blue-400', 
-      descricao: 'Sua situação está estável, mas há espaço para melhorar a poupança.' 
+    return {
+      status: 'Regular',
+      cor: 'text-blue-400',
+      descricao: 'Sua situação está estável, mas há espaço para melhorar a poupança.'
     };
   };
 
   const saudeFinanceira = getSaudeFinanceiraStatus(
-    financialMetrics.taxaEndividamento, 
+    financialMetrics.taxaEndividamento,
     financialMetrics.taxaPoupanca,
     financialMetrics.saldo
   );
@@ -140,7 +140,7 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
                   {saudeFinanceira.status}
                 </span>
               </div>
-              
+
               {/* Descrição do Status */}
               <p className="text-sm text-gray-400">
                 {saudeFinanceira.descricao}
@@ -173,54 +173,60 @@ const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({ isOpen, onClo
           {/* Gráfico de Evolução */}
           <div className="bg-gray-800 rounded-lg p-3 md:col-span-2">
             <h3 className="text-lg font-medium text-white mb-3">Evolução do Saldo</h3>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={account.historico_saldo || []}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis 
-                    dataKey="data" 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#9CA3AF' }}
-                  />
-                  <YAxis 
-                    stroke="#9CA3AF"
-                    tick={{ fill: '#9CA3AF' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      color: '#fff'
-                    }}
-                    formatter={(value: number) => formatCurrency(value)}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="valor" 
-                    name="Saldo"
-                    stroke="#10B981" 
-                    strokeWidth={2}
-                    dot={{ fill: '#10B981' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="gastos" 
-                    name="Gastos"
-                    stroke="#EF4444" 
-                    strokeWidth={2}
-                    dot={{ fill: '#EF4444' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="receitas" 
-                    name="Receitas"
-                    stroke="#3B82F6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3B82F6' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="h-48 flex items-center justify-center">
+              {(!account.historico_saldo || account.historico_saldo.length === 0) ? (
+                <span className="text-gray-400 text-center">
+                  O gráfico aparecerá aqui após a primeira transação.
+                </span>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={account.historico_saldo}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis
+                      dataKey="data"
+                      stroke="#9CA3AF"
+                      tick={{ fill: '#9CA3AF' }}
+                    />
+                    <YAxis
+                      stroke="#9CA3AF"
+                      tick={{ fill: '#9CA3AF' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        color: '#fff'
+                      }}
+                      formatter={(value: number) => formatCurrency(value)}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="valor"
+                      name="Saldo"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      dot={{ fill: '#10B981' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="gastos"
+                      name="Gastos"
+                      stroke="#EF4444"
+                      strokeWidth={2}
+                      dot={{ fill: '#EF4444' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="receitas"
+                      name="Receitas"
+                      stroke="#3B82F6"
+                      strokeWidth={2}
+                      dot={{ fill: '#3B82F6' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 

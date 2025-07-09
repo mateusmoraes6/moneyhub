@@ -78,7 +78,7 @@ export function useAccountDetails(account: BankAccountSummary | null, transactio
         gastos += Number(t.amount);
       }
       historico_saldo.push({
-        data: t.date,
+        data: `${String(new Date(t.date).getMonth() + 1).padStart(2, '0')}/${new Date(t.date).getFullYear()}`,
         valor: saldo,
         gastos,
         receitas,
