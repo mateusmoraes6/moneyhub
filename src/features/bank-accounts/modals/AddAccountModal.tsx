@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { BankAccountSummary } from '../../../types';
+import { useAccounts } from '../../../context/AccountsContext';
+import ConfirmModal from '../../../components/common/ConfirmModal';
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -23,10 +25,12 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
   const [form, setForm] = useState({
     name: '',
     bank_name: '',
-    balance: '',
-    type: 'checking' as 'checking' | 'savings'
+    balance: ''
   });
   const [showBankSelector, setShowBankSelector] = useState(false);
+  const { accounts } = useAccounts();
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [pendingAccount, setPendingAccount] = useState<Omit<BankAccountSummary, 'id' | 'created_at'> | null>(null);
 
   const handleSelectBank = (bank_name: typeof bancos[0]) => {
     setForm(prev => ({
@@ -45,20 +49,40 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
     }
 
     const balance = form.balance ? parseFloat(form.balance.replace(',', '.')) : 0;
-
-    onSave({
-      // name: form.name,
+    const newAccount = {
       bank_name: form.bank_name,
       balance: balance,
-      // type: form.type,
-    });
+    };
+
+    // Verifica duplicidade
+    const existing = accounts.find(acc => acc.bank_name === form.bank_name);
+    if (existing) {
+      setPendingAccount(newAccount);
+      setIsDuplicateModalOpen(true);
+      return;
+    }
+
+    onSave(newAccount);
     onClose();
     setForm({
       name: '',
       bank_name: '',
       balance: '',
-      type: 'checking'
     });
+  };
+
+  const confirmAddDuplicate = () => {
+    if (pendingAccount) {
+      onSave(pendingAccount);
+      onClose();
+      setForm({
+        name: '',
+        bank_name: '',
+        balance: ''
+      });
+      setPendingAccount(null);
+      setIsDuplicateModalOpen(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -123,37 +147,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
             </div>
           </div>
 
-          {/* Tipo de Conta */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Tipo de Conta
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setForm(prev => ({ ...prev, type: 'checking' }))}
-                className={`p-3 rounded-lg border transition-colors ${
-                  form.type === 'checking'
-                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
-                }`}
-              >
-                Conta Corrente
-              </button>
-              <button
-                type="button"
-                onClick={() => setForm(prev => ({ ...prev, type: 'savings' }))}
-                className={`p-3 rounded-lg border transition-colors ${
-                  form.type === 'savings'
-                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
-                }`}
-              >
-                Poupança
-              </button>
-            </div>
-          </div>
-
           {/* Saldo Inicial */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
@@ -182,6 +175,13 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({ isOpen, onClose, onSa
             Adicionar Conta
           </button>
         </form>
+        <ConfirmModal
+          isOpen={isDuplicateModalOpen}
+          title="Conta já cadastrada"
+          description={`Você já possui uma conta para o banco "${form.bank_name}". Deseja adicionar mesmo assim?`}
+          onConfirm={confirmAddDuplicate}
+          onCancel={() => { setIsDuplicateModalOpen(false); setPendingAccount(null); }}
+        />
       </div>
     </div>
   );

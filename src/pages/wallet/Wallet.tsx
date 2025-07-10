@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
-import { useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
 import { useTransactions } from '../../context/TransactionsContext';
 import { Card, CardFormValues } from '../../features/wallet/types/card';
+import { CreditCard, Plus } from 'lucide-react';
 
 const Wallet: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useTransactions();
   const { cards, loading, error, addCard, editCard, deleteCard } = useWalletCards(user?.id);
   const [showModal, setShowModal] = useState(false);
@@ -59,23 +58,11 @@ const Wallet: React.FC = () => {
       <Header />
       
       <main className="container mt-12 pt-16 mx-auto px-4 py-6 max-w-4xl">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-4 text-emerald-400 hover:text-emerald-300 flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Voltar
-        </button>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Meus Cartões</h1>
-          <button
-            onClick={handleAdd}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition"
-          >
-            + Adicionar Cartão
-          </button>
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="bg-emerald-500 rounded-full p-2">
+            <CreditCard className="h-6 w-6 text-white" />
+          </div>
+          <h1 className="text-2xl font-semibold text-white">Cartões de Crédito</h1>
         </div>
         <CreditCardList
           cards={cards}
@@ -83,6 +70,16 @@ const Wallet: React.FC = () => {
           onDelete={handleDelete}
           onSelect={handleSelect}
         />
+        {/* Botão de adicionar cartão na parte inferior, igual ao de contas bancárias */}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleAdd}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium text-sm flex items-center gap-2 shadow"
+          >
+            <Plus className="w-4 h-4" />
+            Adicionar Cartão
+          </button>
+        </div>
         <CreditCardFormModal
           isOpen={showModal}
           onClose={() => {
