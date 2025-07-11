@@ -3,12 +3,11 @@ import CreditCardCard from './CardItem';
 
 interface Card {
   id: number;
-  nome_banco: string;
-  icone_url: string;
-  limite_total: number;
-  limite_disponivel: number;
-  data_fechamento: number;
-  data_vencimento: number;
+  bank_name: string;
+  limit: number;
+  available_limit: number;
+  closing_day: number;
+  due_day: number;
 }
 
 interface CreditCardListProps {

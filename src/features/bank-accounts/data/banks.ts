@@ -1,12 +1,20 @@
-import { Bank } from '../../wallet/types';
+export interface Bank {
+  name: string;
+  icon: string;
+}
 
 export const banks: Bank[] = [
-  { nome: 'Nubank', icone: '/icons/nubank.svg' },
-  { nome: 'Itaú', icone: '/icons/itau.svg' },
-  { nome: 'Banco do Brasil', icone: '/icons/bb.svg' },
-  { nome: 'C6 Bank', icone: '/icons/c6bank.svg' },
-  { nome: 'Santander', icone: '/icons/santander.svg' },
-  { nome: 'Bradesco', icone: '/icons/bradesco.svg' },
-  { nome: 'Inter', icone: '/icons/inter.svg' },
-  { nome: 'Caixa', icone: '/icons/caixa.svg' },
+  { name: 'Nubank', icon: '/icons/nubank.svg' },
+  { name: 'Itaú', icon: '/icons/itau.svg' },
+  { name: 'Banco do Brasil', icon: '/icons/bb.svg' },
+  { name: 'C6 Bank', icon: '/icons/c6bank.svg' },
+  { name: 'Santander', icon: '/icons/santander.svg' },
+  { name: 'Bradesco', icon: '/icons/bradesco.svg' },
+  { name: 'Inter', icon: '/icons/inter.svg' },
+  { name: 'Caixa', icon: '/icons/caixa.svg' },
 ];
+
+// Função utilitária para buscar o ícone pelo nome do banco
+export function getBankIconUrl(bankName: string): string {
+  return banks.find(b => b.name === bankName)?.icon || '/icons/default.svg';
+}

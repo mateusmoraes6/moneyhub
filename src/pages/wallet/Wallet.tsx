@@ -34,16 +34,10 @@ const Wallet: React.FC = () => {
 
   // Função para salvar cartão (novo ou editado)
   const handleSave = async (newCard: CardFormValues) => {
-    const cardToSave = {
-      ...newCard,
-      data_fechamento: newCard.data_fechamento ?? 1,
-      data_vencimento: newCard.data_vencimento ?? 1,
-    };
-
     if (isEditing && selectedCard) {
-      await editCard(selectedCard.id, cardToSave);
+      await editCard(selectedCard.id, newCard);
     } else {
-      await addCard(cardToSave);
+      await addCard(newCard);
     }
     setShowModal(false);
     setIsEditing(false);

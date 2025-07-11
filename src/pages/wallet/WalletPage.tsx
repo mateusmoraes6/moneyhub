@@ -17,6 +17,7 @@ export default function WalletPage() {
   const handleAdd = () => {
     setIsEditing(false);
     setShowModal(true);
+    setSelectedCard(null);
   };
   
   const handleEdit = (card: Card) => {
@@ -32,16 +33,11 @@ export default function WalletPage() {
   const handleSelect = (card: Card) => setSelectedCard(card);
 
   const handleSave = async (newCard: CardFormValues) => {
-    const cardToSave = {
-      ...newCard,
-      data_fechamento: newCard.data_fechamento ?? 1,
-      data_vencimento: newCard.data_vencimento ?? 1,
-    };
-
+    // Não precisa mais de campos em português ou campos extras
     if (isEditing && selectedCard) {
-      await editCard(selectedCard.id, cardToSave);
+      await editCard(selectedCard.id, newCard);
     } else {
-      await addCard(cardToSave);
+      await addCard(newCard);
     }
     setShowModal(false);
     setIsEditing(false);

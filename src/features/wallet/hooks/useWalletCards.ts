@@ -18,12 +18,11 @@ export function useWalletCards(userId?: string | null) {
         if (error) setError(error.message);
         else setCards(data?.map(card => ({
           id: card.id,
-          nome_banco: card.bank_name,
-          icone_url: '',
-          limite_total: card.limit,
-          limite_disponivel: card.available_limit,
-          data_fechamento: card.closing_day,
-          data_vencimento: card.due_day,
+          bank_name: card.bank_name,
+          limit: card.limit,
+          available_limit: card.available_limit,
+          closing_day: card.closing_day,
+          due_day: card.due_day,
         })) || []);
         setLoading(false);
       });
@@ -36,22 +35,21 @@ export function useWalletCards(userId?: string | null) {
       .from('cards')
       .insert([{
         user_id: userId,
-        bank_name: card.nome_banco,
-        limit: card.limite_total,
-        available_limit: card.limite_disponivel,
-        closing_day: card.data_fechamento,
-        due_day: card.data_vencimento,
+        bank_name: card.bank_name,
+        limit: card.limit,
+        available_limit: card.available_limit,
+        closing_day: card.closing_day,
+        due_day: card.due_day,
       }])
       .select();
     if (error) setError(error.message);
     else setCards(prev => [...prev, ...(data?.map(card => ({
       id: card.id,
-      nome_banco: card.bank_name,
-      icone_url: '',
-      limite_total: card.limit,
-      limite_disponivel: card.available_limit,
-      data_fechamento: card.closing_day,
-      data_vencimento: card.due_day,
+      bank_name: card.bank_name,
+      limit: card.limit,
+      available_limit: card.available_limit,
+      closing_day: card.closing_day,
+      due_day: card.due_day,
     })) || [])]);
   };
 
@@ -59,11 +57,11 @@ export function useWalletCards(userId?: string | null) {
     const { data, error } = await supabase
       .from('cards')
       .update({
-        bank_name: updated.nome_banco,
-        limit: updated.limite_total,
-        available_limit: updated.limite_disponivel,
-        closing_day: updated.data_fechamento,
-        due_day: updated.data_vencimento,
+        bank_name: updated.bank_name,
+        limit: updated.limit,
+        available_limit: updated.available_limit,
+        closing_day: updated.closing_day,
+        due_day: updated.due_day,
       })
       .eq('id', id)
       .select();
@@ -71,12 +69,11 @@ export function useWalletCards(userId?: string | null) {
     else setCards(prev =>
       prev.map(card => (card.id === id ? {
         id: data[0].id,
-        nome_banco: data[0].bank_name,
-        icone_url: '',
-        limite_total: data[0].limit,
-        limite_disponivel: data[0].available_limit,
-        data_fechamento: data[0].closing_day,
-        data_vencimento: data[0].due_day,
+        bank_name: data[0].bank_name,
+        limit: data[0].limit,
+        available_limit: data[0].available_limit,
+        closing_day: data[0].closing_day,
+        due_day: data[0].due_day,
       } : card))
     );
   };

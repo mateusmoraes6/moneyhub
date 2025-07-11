@@ -9,25 +9,24 @@ interface CreditCardFormModalProps {
   initialValues?: CardFormValues;
 }
 
-const bancos = [
-  { nome: 'Nubank', icone: '/icons/nubank.svg' },
-  { nome: 'Itaú', icone: '/icons/itau.svg' },
-  { nome: 'Banco do Brasil', icone: '/icons/bb.svg' },
-  { nome: 'C6 Bank', icone: '/icons/c6bank.svg' },
-  { nome: 'Santander', icone: '/icons/santander.svg' },
-  { nome: 'Bradesco', icone: '/icons/bradesco.svg' },
-  { nome: 'Inter', icone: '/icons/inter.svg' },
-  { nome: 'Caixa', icone: '/icons/caixa.svg' },
+const banks = [
+  { name: 'Nubank', icon: '/icons/nubank.svg' },
+  { name: 'Itaú', icon: '/icons/itau.svg' },
+  { name: 'Banco do Brasil', icon: '/icons/bb.svg' },
+  { name: 'C6 Bank', icon: '/icons/c6bank.svg' },
+  { name: 'Santander', icon: '/icons/santander.svg' },
+  { name: 'Bradesco', icon: '/icons/bradesco.svg' },
+  { name: 'Inter', icon: '/icons/inter.svg' },
+  { name: 'Caixa', icon: '/icons/caixa.svg' },
 ];
 
 const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClose, onSave, initialValues }) => {
   const [form, setForm] = useState<CardFormValues>(initialValues || {
-    nome_banco: '',
-    icone_url: '',
-    limite_total: 0,
-    limite_disponivel: 0,
-    data_fechamento: 1,
-    data_vencimento: 15,
+    bank_name: '',
+    limit: 0,
+    available_limit: 0,
+    closing_day: 1,
+    due_day: 15,
   });
 
   const [showBankSelector, setShowBankSelector] = useState(false);
@@ -50,62 +49,56 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setForm(prev => ({
       ...prev,
-      [name]: name.includes('limite') || name.includes('data') ? (value === '' ? 0 : Number(value)) : value,
+      [name]: ['limit', 'available_limit', 'closing_day', 'due_day'].includes(name)
+        ? (value === '' ? 0 : Number(value))
+        : value,
     }));
   };
 
-  const handleCurrencyChange = (name: string, value: string) => {
-    const numericValue = Number(value.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+  const handleSelectBank = (bank: typeof banks[0]) => {
     setForm(prev => ({
       ...prev,
-      [name]: numericValue,
-    }));
-  };
-
-  const handleSelectBank = (bank: typeof bancos[0]) => {
-    setForm(prev => ({
-      ...prev,
-      nome_banco: bank.nome,
-      icone_url: bank.icone,
+      bank_name: bank.name,
     }));
     setShowBankSelector(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nome_banco || form.limite_total === undefined || form.limite_disponivel === undefined || form.data_fechamento === undefined || form.data_vencimento === undefined) {
-        alert('Por favor, preencha todos os campos obrigatórios.');
-        return;
+    if (!form.bank_name || form.limit === undefined || form.available_limit === undefined || form.closing_day === undefined || form.due_day === undefined) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
     }
-    
+
     const valuesToSave = {
-        ...form,
-        limite_total: form.limite_total ?? 0,
-        limite_disponivel: form.limite_disponivel ?? 0,
-        data_fechamento: form.data_fechamento ?? 1,
-        data_vencimento: form.data_vencimento ?? 1,
+      ...form,
+      limit: form.limit ?? 0,
+      available_limit: form.available_limit ?? 0,
+      closing_day: form.closing_day ?? 1,
+      due_day: form.due_day ?? 1,
     };
 
     onSave(valuesToSave as CardFormValues);
     onClose();
     setForm({
-      nome_banco: '',
-      icone_url: '',
-      limite_total: 0,
-      limite_disponivel: 0,
-      data_fechamento: 1,
-      data_vencimento: 1,
+      bank_name: '',
+      limit: 0,
+      available_limit: 0,
+      closing_day: 1,
+      due_day: 1,
     });
   };
+
+  // Busca o ícone do banco selecionado
+  const selectedBank = banks.find(b => b.name === form.bank_name);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-60 p-4">
-      <div 
+      <div
         ref={modalRef}
         className="bg-gray-900 rounded-xl w-full max-w-[90vw] md:max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto"
       >
@@ -134,12 +127,14 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
                 type="button"
                 onClick={() => setShowBankSelector(!showBankSelector)}
                 className={`w-full p-4 bg-gray-800 border rounded-lg text-left flex items-center justify-between
-                  ${form.nome_banco ? 'border-green-500' : 'border-gray-700'}`}
+                  ${form.bank_name ? 'border-green-500' : 'border-gray-700'}`}
               >
-                {form.nome_banco ? (
+                {form.bank_name ? (
                   <div className="flex items-center gap-3">
-                    <img src={form.icone_url} alt={form.nome_banco} className="w-6 h-6" />
-                    <span className="font-medium text-white">{form.nome_banco}</span>
+                    {selectedBank && (
+                      <img src={selectedBank.icon} alt={selectedBank.name} className="w-6 h-6" />
+                    )}
+                    <span className="font-medium text-white">{form.bank_name}</span>
                   </div>
                 ) : (
                   <span className="text-gray-400">Ex.: Nubank, Itaú, BB...</span>
@@ -152,15 +147,15 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               {showBankSelector && (
                 <div className="absolute z-10 w-full mt-2 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
                   <div className="p-2 space-y-2">
-                    {bancos.map((bank) => (
+                    {banks.map((bank) => (
                       <button
-                        key={bank.nome}
+                        key={bank.name}
                         type="button"
                         onClick={() => handleSelectBank(bank)}
                         className="w-full p-3 flex items-center gap-3 hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        <img src={bank.icone} alt={bank.nome} className="w-6 h-6" />
-                        <span className="font-medium text-white">{bank.nome}</span>
+                        <img src={bank.icon} alt={bank.name} className="w-6 h-6" />
+                        <span className="font-medium text-white">{bank.name}</span>
                       </button>
                     ))}
                   </div>
@@ -177,8 +172,8 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               </label>
               <input
                 type="text"
-                name="limite_total"
-                value={form.limite_total === 0 ? '' : form.limite_total.toString()}
+                name="limit"
+                value={form.limit === 0 ? '' : form.limit.toString()}
                 onChange={handleChange}
                 placeholder="Ex.: 0,00"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -192,8 +187,8 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               </label>
               <input
                 type="text"
-                name="limite_disponivel"
-                value={form.limite_disponivel === 0 ? '' : form.limite_disponivel.toString()}
+                name="available_limit"
+                value={form.available_limit === 0 ? '' : form.available_limit.toString()}
                 onChange={handleChange}
                 placeholder="Ex.: 0,00"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -210,8 +205,8 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               </label>
               <input
                 type="text"
-                name="data_fechamento"
-                value={form.data_fechamento === 1 ? '' : form.data_fechamento.toString()}
+                name="closing_day"
+                value={form.closing_day === 1 ? '' : form.closing_day.toString()}
                 onChange={handleChange}
                 placeholder="Ex.: 5"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -225,8 +220,8 @@ const CreditCardFormModal: React.FC<CreditCardFormModalProps> = ({ isOpen, onClo
               </label>
               <input
                 type="text"
-                name="data_vencimento"
-                value={form.data_vencimento === 15 ? '' : form.data_vencimento.toString()}
+                name="due_day"
+                value={form.due_day === 15 ? '' : form.due_day.toString()}
                 onChange={handleChange}
                 placeholder="Ex.: 15"
                 className="w-full p-4 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent"

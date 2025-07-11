@@ -40,34 +40,6 @@ const CardTransactions: React.FC<CardTransactionsProps> = ({ cardId, onClose }) 
     fetchTransactions();
   }, [cardId]);
 
-  // Exemplo de transações mockadas
-  // const mockTransactions: Transaction[] = [
-  //   {
-  //     id: 1,
-  //     descricao: 'Supermercado Extra',
-  //     valor: 250.90,
-  //     data: '2024-03-15',
-  //     categoria: 'Alimentação',
-  //     status: 'pago'
-  //   },
-  //   {
-  //     id: 2,
-  //     descricao: 'Netflix',
-  //     valor: 39.90,
-  //     data: '2024-03-10',
-  //     categoria: 'Entretenimento',
-  //     status: 'pendente'
-  //   },
-  //   {
-  //     id: 3,
-  //     descricao: 'Uber',
-  //     valor: 45.50,
-  //     data: '2024-03-14',
-  //     categoria: 'Transporte',
-  //     status: 'pago'
-  //   }
-  // ];
-
   return (
     <div className="mt-8 bg-gray-800 rounded-xl p-6">
       <div className="flex justify-between items-center mb-6">

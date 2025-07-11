@@ -3,6 +3,7 @@ import { Card } from '../../types';
 import LimitDonutChart from '../CardChart/LimitDonutChart';
 import CardDetailsModal from '../../modals/CardDetailsModal';
 import BankIcon from '../../../../components/common/BankIcon';
+import { getBankIconUrl } from '../../../bank-accounts/data/banks';
 
 interface CardItemProps {
   card: Card;
@@ -14,8 +15,8 @@ interface CardItemProps {
 const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const valorFaturaAtual = card.limite_total - card.limite_disponivel;
-  const percentualGasto = (valorFaturaAtual / card.limite_total) * 100;
+  const valorFaturaAtual = card.limit - card.available_limit;
+  const percentualGasto = (valorFaturaAtual / card.limit) * 100;
 
   // Função para determinar a cor do alerta da fatura
   const getFaturaColor = () => {
@@ -60,7 +61,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
                 className="w-full text-left px-4 py-2 text-sm text-emerald-400 hover:bg-gray-700"
                 type="button"
               >
-                + Detalhes
+                + Details
               </button>
               
               <button
@@ -72,7 +73,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
                 className="w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-gray-700 rounded-t-lg"
                 type="button"
               >
-                Editar
+                Edit
               </button>
               
               <button
@@ -84,7 +85,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
                 className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b-lg"
                 type="button"
               >
-                Excluir
+                Delete
               </button>
             </div>
           )}
@@ -93,39 +94,38 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
         {/* Bloco 1 — Identificação */}
         <div className="flex items-center gap-3 mb-4">
           <BankIcon
-            iconUrl={card.icone_url}
-            bankName={card.nome_banco}
+            iconUrl={getBankIconUrl(card.bank_name)}
+            bankName={card.bank_name}
             size="md"
           />
           <div>
-            {/* <h3 className="text-lg font-semibold text-white">{card.apelido}</h3> */}
-            <p className="text-sm text-gray-400">{card.nome_banco}</p>
+            <h3 className="text-lg font-semibold text-white">{card.bank_name}</h3>
           </div>
         </div>
 
         {/* Bloco 2 — Limite disponível */}
         <div className="mb-3">
-          <p className="text-sm text-gray-400">Limite disponível</p>
+          <p className="text-sm text-gray-400">Available Limit</p>
           <p className="text-xl font-semibold text-emerald-400">
-            R$ {card.limite_disponivel.toLocaleString('pt-BR')}
+            R$ {card.available_limit.toLocaleString('pt-BR')}
           </p>
           <p className="text-sm text-gray-500">
-            Limite total: R$ {card.limite_total.toLocaleString('pt-BR')}
+            Total Limit: R$ {card.limit.toLocaleString('pt-BR')}
           </p>
         </div>
 
         {/* Bloco 3 e 4 — Fatura atual e Gráfico */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm text-gray-400">Fatura atual</p>
+            <p className="text-sm text-gray-400">Current Invoice</p>
             <p className={`text-lg font-semibold ${getFaturaColor()}`}>
               R$ {valorFaturaAtual.toLocaleString('pt-BR')}
             </p>
           </div>
           <div className="w-16 h-16">
             <LimitDonutChart
-              limiteTotal={card.limite_total}
-              limiteDisponivel={card.limite_disponivel}
+              limiteTotal={card.limit}
+              limiteDisponivel={card.available_limit}
               size={64}
             />
           </div>
@@ -134,7 +134,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
         {/* Bloco 5 — Fechamento e Vencimento */}
         <div className="mb-4">
           <p className="text-xs text-gray-500">
-            Fechamento: dia {card.data_fechamento} | Vencimento: dia {card.data_vencimento}
+            Closing: day {card.closing_day} | Due: day {card.due_day}
           </p>
         </div>
 
@@ -148,7 +148,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
             className="text-sm text-emerald-400 hover:underline px-2 py-1"
             type="button"
           >
-            + Detalhes
+            + Details
           </button>
           <button
             onClick={(e) => {
@@ -158,7 +158,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
             className="text-sm text-blue-400 hover:underline px-2 py-1"
             type="button"
           >
-            Editar
+            Edit
           </button>
           <button
             onClick={(e) => {
@@ -168,7 +168,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
             className="text-sm text-red-400 hover:underline px-2 py-1"
             type="button"
           >
-            Excluir
+            Delete
           </button>
         </div>
       </div>
