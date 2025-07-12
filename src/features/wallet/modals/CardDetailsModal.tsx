@@ -1,7 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Card } from '../types/card';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import BankIcon from '../../../components/common/BankIcon';
 import LimitDonutChart from '../components/CardChart/LimitDonutChart';
 import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';

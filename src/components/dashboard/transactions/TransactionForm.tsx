@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlusCircle, LogIn, X, AlertCircle } from 'lucide-react';
 import { useTransactions } from '../../../context/TransactionsContext';
 import { useAccounts } from '../../../context/AccountsContext';
-import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES, Card, BankAccountSummary } from '../../../types';
+import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES, BankAccountSummary } from '../../../types';
 import AccountSelector from '../../../features/bank-accounts/components/AccountSelector/AccountSelector';
 import CardSelector from '../../../features/wallet/components/CardSelector/CardSelector';
 
@@ -10,34 +10,31 @@ const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
   const { accounts, cards, updateCardLimit, updateAccount } = useAccounts();
 
-  // Função auxiliar para normalizar o nome do banco
   const normalizeBankName = (name: string) => {
     return name
-      .normalize("NFD") // Normaliza para decompor caracteres acentuados
-      .replace(/[\u0300-\u036f]/g, "") // Remove os diacríticos (acentos)
-      .toLowerCase() // Converte para minúsculas
-      .replace(/\s/g, ""); // Remove todos os espaços em branco
+      .normalize("NFD") 
+      .replace(/[\u0300-\u036f]/g, "") 
+      .toLowerCase() 
+      .replace(/\s/g, "");
   };
 
   const mapAccountToSelector = (account: BankAccountSummary) => ({
     id: account.id,
     nome_banco: account.bank_name,
-    // numero_conta: account.type,
     icone_url: `/icons/${normalizeBankName(account.bank_name)}.svg`,
     saldo: account.balance,
     historico_saldo: []
   });
 
-  const mapCardToSelector = (card: Card) => ({
-    id: card.id,
-    nome_banco: card.bank_name,
-    icone_url: `/icons/${normalizeBankName(card.bank_name)}.svg`,
-    // apelido: card.name,
-    limite_total: card.limit,
-    limite_disponivel: card.available_limit,
-    data_fechamento: card.closing_day,
-    data_vencimento: card.due_day
-  });
+  // const mapCardToSelector = (card: Card) => ({
+  //   id: card.id,
+  //   nome_banco: card.bank_name,
+  //   icone_url: `/icons/${normalizeBankName(card.bank_name)}.svg`,
+  //   limite_total: card.limit,
+  //   limite_disponivel: card.available_limit,
+  //   data_fechamento: card.closing_day,
+  //   data_vencimento: card.due_day
+  // });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -52,7 +49,7 @@ const TransactionForm: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix_debit');
   const [category, setCategory] = useState('');
   const [accountId, setAccountId] = useState<number | undefined>(undefined);
-  const [cardId, setCardId] = useState<number | string | undefined>(undefined);
+  const [cardId, setCardId] = useState<number | undefined>(undefined);
   const [installmentId, setInstallmentId] = useState<string | undefined>(undefined);
   const [installmentNum, setInstallmentNum] = useState<number>(1);
 
@@ -391,11 +388,27 @@ const TransactionForm: React.FC = () => {
                       onSelect={id => setAccountId(id)}
                     />
                   ) : (
-                    <CardSelector
-                      cards={cards.map(mapCardToSelector)}
-                      selectedId={typeof cardId === 'string' ? parseInt(cardId) : cardId}
-                      onSelect={setCardId}
-                    />
+                    <>
+                      <CardSelector
+                        cards={cards}
+                        selectedId={cardId}
+                        onSelect={setCardId}
+                      />
+                      {/* Exibe o cartão selecionado, se houver */}
+                      {/* {selectedCardObj && (
+                        <div className="flex items-center gap-2 mt-2 bg-gray-800 p-2 rounded-lg">
+                          <BankIcon
+                            iconUrl={`/icons/${normalizeBankName(selectedCardObj.bank_name)}.svg`}
+                            bankName={selectedCardObj.bank_name}
+                            size="sm"
+                          />
+                          <span className="text-white text-sm">{selectedCardObj.bank_name}</span>
+                          <span className="text-xs text-gray-400 ml-2">
+                            Limite disponível: R$ {selectedCardObj.available_limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      )} */}
+                    </>
                   )}
                 </div>
 

@@ -57,7 +57,12 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCards(data || []);
+      setCards(
+        (data || []).map(card => ({
+          ...card,
+          bank_name: card.bank_name,
+        }))
+      );
     } catch (err) {
       console.error('Erro ao buscar cartões:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar cartões');

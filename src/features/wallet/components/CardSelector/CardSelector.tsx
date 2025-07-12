@@ -16,12 +16,24 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedCard = cards.find(card => card.id === selectedId);
+  const selectedCard = cards.find(c => c.id === selectedId);
+
+  // Helper to normalize bank name for icon path
+  const normalizeBankName = (name: string) =>
+    name
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s/g, "");
 
   const getDisplayData = (card: Card) => {
-    const bankName = card.nome_banco;
-    const iconUrl = card.icone_url;
-    const extraInfo = `Limite disponível: R$ ${card.limite_disponivel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const bankName = card.bank_name;
+    const iconUrl = `/icons/${normalizeBankName(card.bank_name)}.svg`;
+    const extraInfo = `Available limit: R$ ${
+      typeof card.available_limit === 'number'
+        ? card.available_limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+        : '-'
+    }`;
 
     return { bankName, iconUrl, extraInfo };
   };
@@ -42,7 +54,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   return (
     <div className="relative" ref={dropdownRef}>
       <label className="block text-sm font-medium text-gray-300 mb-1">
-        Cartão
+        Card
       </label>
       <button
         type="button"
@@ -60,7 +72,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({
           <span className={selectedCard ? 'text-white' : 'text-gray-400'}>
             {selectedCardData
               ? selectedCardData.bankName
-              : 'Selecione um cartão'
+              : 'Select a card'
             }
           </span>
         </div>
