@@ -5,6 +5,7 @@ import { useAccounts } from '../../../context/AccountsContext';
 import { TransactionType, PaymentMethod, INCOME_CATEGORIES, EXPENSE_CATEGORIES, BankAccountSummary } from '../../../types';
 import AccountSelector from '../../../features/bank-accounts/components/AccountSelector/AccountSelector';
 import CardSelector from '../../../features/wallet/components/CardSelector/CardSelector';
+import { supabase } from '../../../supabaseClient';
 
 const TransactionForm: React.FC = () => {
   const { addTransaction, isAuthenticated } = useTransactions();
@@ -52,6 +53,7 @@ const TransactionForm: React.FC = () => {
   const [cardId, setCardId] = useState<number | undefined>(undefined);
   const [installmentId, setInstallmentId] = useState<string | undefined>(undefined);
   const [installmentNum, setInstallmentNum] = useState<number>(1);
+  const [showInstallmentOptions, setShowInstallmentOptions] = useState(false);
 
   const resetForm = () => {
     setDescription('');
@@ -65,14 +67,17 @@ const TransactionForm: React.FC = () => {
     setCardId(undefined);
     setInstallmentId(undefined);
     setInstallmentNum(1);
+    setShowInstallmentOptions(false);
   };
 
   useEffect(() => {
     if (paymentMethod === 'pix_debit') {
       setCardId(undefined);
       setInstallmentNum(1);
+      setShowInstallmentOptions(false);
     } else {
       setAccountId(undefined);
+      setShowInstallmentOptions(true);
     }
   }, [paymentMethod]);
 
@@ -118,6 +123,11 @@ const TransactionForm: React.FC = () => {
         setError('Valor excede o limite disponível do cartão');
         return;
       }
+
+      if (installmentNum < 1 || installmentNum > 24) {
+        setError('Número de parcelas deve estar entre 1 e 24');
+        return;
+      }
     }
 
     // Validações para conta
@@ -127,6 +137,30 @@ const TransactionForm: React.FC = () => {
     }
 
     try {
+      // Se for transação de crédito e parcelada, criar o parcelamento primeiro
+      let installmentId: string | undefined = undefined;
+      
+      if (paymentMethod === 'credit' && installmentNum > 1) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const { data: installmentData, error: installmentError } = await supabase
+          .from('installments')
+          .insert([{
+            user_id: user.id,
+            total: amountValue,
+            num_installments: installmentNum,
+            start_date: date,
+            card_id: cardId as number,
+            description: description.trim(),
+          }])
+          .select()
+          .single();
+
+        if (installmentError) throw installmentError;
+        installmentId = installmentData.id;
+      }
+
       // Add transaction
       await addTransaction({
         description: description.trim(),
@@ -137,7 +171,7 @@ const TransactionForm: React.FC = () => {
         category_id: category,
         account_id: paymentMethod === 'pix_debit' ? (accountId as number | undefined) : undefined,
         card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
-        installment_id: paymentMethod === 'credit' ? installmentId : undefined,
+        installment_id: installmentId,
         installment_num: paymentMethod === 'credit' ? installmentNum : undefined,
         status: 'pending',
       });
@@ -394,20 +428,42 @@ const TransactionForm: React.FC = () => {
                         selectedId={cardId}
                         onSelect={setCardId}
                       />
-                      {/* Exibe o cartão selecionado, se houver */}
-                      {/* {selectedCardObj && (
-                        <div className="flex items-center gap-2 mt-2 bg-gray-800 p-2 rounded-lg">
-                          <BankIcon
-                            iconUrl={`/icons/${normalizeBankName(selectedCardObj.bank_name)}.svg`}
-                            bankName={selectedCardObj.bank_name}
-                            size="sm"
-                          />
-                          <span className="text-white text-sm">{selectedCardObj.bank_name}</span>
-                          <span className="text-xs text-gray-400 ml-2">
-                            Limite disponível: R$ {selectedCardObj.available_limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </span>
+                      
+                      {/* Opções de Parcelamento para Cartão de Crédito */}
+                      {showInstallmentOptions && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Parcelamento
+                          </label>
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <input
+                                type="number"
+                                min="1"
+                                max="24"
+                                value={installmentNum}
+                                onChange={(e) => setInstallmentNum(Number(e.target.value))}
+                                className="flex-1 p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
+                                placeholder="1"
+                              />
+                              <span className="text-gray-400 text-sm whitespace-nowrap">
+                                {installmentNum === 1 ? 'vez' : 'vezes'}
+                              </span>
+                            </div>
+                            
+                            {installmentNum > 1 && (
+                              <div className="bg-gray-800 p-3 rounded-lg">
+                                <p className="text-sm text-gray-400">
+                                  Valor total: <span className="text-white font-medium">R$ {parseFloat(amount || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                  Valor por parcela: <span className="text-white font-medium">R$ {(parseFloat(amount || '0') / installmentNum).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )} */}
+                      )}
                     </>
                   )}
                 </div>

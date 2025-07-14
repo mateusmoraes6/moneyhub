@@ -58,6 +58,9 @@ const Wallet: React.FC = () => {
           </div>
           <h1 className="text-2xl font-semibold text-white">Cartões de Crédito</h1>
         </div>
+        <div className="bg-yellow-900 text-yellow-200 rounded-md p-4 mb-6 text-center font-medium">
+          Atenção: Esta página de cartões de crédito ainda está em desenvolvimento. Algumas funcionalidades podem não estar disponíveis.
+        </div>
         <CreditCardList
           cards={cards}
           onEdit={handleEdit}

@@ -49,16 +49,16 @@ const Header: React.FC = () => {
               Visão Geral
             </Link>
             <Link
-              to="/wallet"
-              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
-            >
-              Cartões de Crédito
-            </Link>
-            <Link
               to="/bank-accounts"
               className="text-emerald-400 hover:text-emerald-300 font-medium transition"
             >
               Contas Bancárias
+            </Link>
+            <Link
+              to="/wallet"
+              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
+            >
+              Cartões de Crédito
             </Link>
           </div>
 
