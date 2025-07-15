@@ -5,6 +5,8 @@ import LimitDonutChart from '../components/CardChart/LimitDonutChart';
 import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { getBankIconUrl } from '../../bank-accounts/data/banks';
 import { useCardDetails } from '../hooks/useCardDetails';
+import InstallmentProgressBar from '../../../components/common/InstallmentProgressBar';
+import { InstallmentParcel } from '../types/installment';
 
 interface CardDetailsModalProps {
   isOpen: boolean;
@@ -20,9 +22,11 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
   if (loading) return <div className="p-8 text-white">Carregando...</div>;
   if (!cardData) return <div className="p-8 text-red-400">Cartão não encontrado.</div>;
 
-  // Cálculo do limite utilizado
-  const limitUsed = (cardData.limit ?? 0) - (cardData.available_limit ?? 0);
-  const percentUsed = cardData.limit ? Math.round((limitUsed / cardData.limit) * 100) : 0;
+  // Soma o valor de todas as transações do cartão (apenas as que contam para o limite)
+  const limitUsed = transactions.reduce((acc, t) => acc + (t.amount || 0), 0);
+  const limitTotal = cardData.limit ?? 0;
+  const availableLimit = limitTotal - limitUsed;
+  const percentUsed = limitTotal ? Math.round((limitUsed / limitTotal) * 100) : 0;
 
   // Exemplo de cálculo de fatura (ajuste conforme sua lógica de fechamento/vencimento)
   const valor_total = transactions.reduce((acc, t) => acc + (t.amount || 0), 0);
@@ -75,15 +79,15 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
               <p className="text-sm text-gray-400">{cardData.bank_name}</p>
               <div className="flex items-center gap-2 mt-2">
                 <LimitDonutChart
-                  limiteTotal={cardData.limit ?? 0}
-                  limiteDisponivel={cardData.available_limit ?? 0}
+                  limiteTotal={limitTotal}
+                  limiteDisponivel={availableLimit}
                   size={40}
                 />
                 <span className="text-xs text-gray-400">
                   Limite usado: <span className="font-bold text-white">{percentUsed}%</span>
                 </span>
                 <span className="text-xs text-gray-400">
-                  (R$ {(limitUsed).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {(cardData.limit ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                  (R$ {limitUsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {limitTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
                 </span>
               </div>
             </div>
@@ -161,10 +165,34 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                       <p className="text-xs text-gray-400">
                         Início: {parcelamento.start_date && new Date(parcelamento.start_date).toLocaleDateString('pt-BR')}
                       </p>
+                      {/* Barra de progresso */}
+                      {parcelamento.parcels && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex-1">
+                            <InstallmentProgressBar
+                              total={parcelamento.num_installments}
+                              paid={parcelamento.parcels.filter((p: InstallmentParcel) => p.status === 'paid').length}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <p className="text-lg font-semibold text-white">
                       R$ {parcelamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
+                  </div>
+                  {/* Detalhamento das parcelas */}
+                  <div className="mt-2 space-y-1">
+                    {parcelamento.parcels?.map((parcela: InstallmentParcel, idx: number) => (
+                      <div key={idx} className="flex justify-between text-xs">
+                        <span>
+                          Installment {idx + 1} - {new Date(parcela.date).toLocaleDateString('pt-BR')}
+                        </span>
+                        <span className={parcela.status === 'paid' ? 'text-emerald-400' : 'text-yellow-400'}>
+                          R$ {parcela.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - {parcela.status === 'paid' ? 'Paid' : 'Pending'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}

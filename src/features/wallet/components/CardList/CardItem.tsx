@@ -10,21 +10,18 @@ interface CardItemProps {
   onEdit: (card: Card) => void;
   onDelete: (card: Card) => void;
   onSelect: (card: Card) => void;
+  limitUsed: number;
+  availableLimit: number;
+  percentUsed: number;
+  currentInvoice: number;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect }) => {
+const CardItem: React.FC<CardItemProps> = ({
+  card, onEdit, onDelete, onSelect, limitUsed, availableLimit, percentUsed, currentInvoice
+}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const valorFaturaAtual = card.limit - card.available_limit;
-  const percentualGasto = (valorFaturaAtual / card.limit) * 100;
-
-  // Função para determinar a cor do alerta da fatura
-  const getFaturaColor = () => {
-    if (percentualGasto >= 80) return 'text-red-400';
-    if (percentualGasto >= 60) return 'text-yellow-400';
-    return 'text-emerald-400';
-  };
-
+  // Use apenas os props recebidos:
   return (
     <>
       <div
@@ -105,30 +102,28 @@ const CardItem: React.FC<CardItemProps> = ({ card, onEdit, onDelete, onSelect })
 
         {/* Bloco 2 — Limite disponível */}
         <div className="mb-3">
-          <p className="text-sm text-gray-400">Available Limit</p>
+          <p className="text-sm text-gray-400">Limite disponível</p>
           <p className="text-xl font-semibold text-emerald-400">
-            R$ {card.available_limit.toLocaleString('pt-BR')}
+            R$ {availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="text-sm text-gray-500">
-            Total Limit: R$ {card.limit.toLocaleString('pt-BR')}
+            Limite total: R$ {card.limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
 
         {/* Bloco 3 e 4 — Fatura atual e Gráfico */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm text-gray-400">Current Invoice</p>
-            <p className={`text-lg font-semibold ${getFaturaColor()}`}>
-              R$ {valorFaturaAtual.toLocaleString('pt-BR')}
+            <p className="text-sm text-gray-400">Fatura atual</p>
+            <p className="text-lg font-semibold">
+              R$ {currentInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </div>
-          <div className="w-16 h-16">
-            <LimitDonutChart
-              limiteTotal={card.limit}
-              limiteDisponivel={card.available_limit}
-              size={64}
-            />
-          </div>
+          <LimitDonutChart
+            limiteTotal={card.limit}
+            limiteDisponivel={availableLimit}
+            size={64}
+          />
         </div>
 
         {/* Bloco 5 — Fechamento e Vencimento */}

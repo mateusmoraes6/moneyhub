@@ -1,3 +1,9 @@
+export interface InstallmentParcel {
+  date: string;
+  amount: number;
+  status: 'paid' | 'pending';
+}
+
 export interface Parcelamento {
   id: number;
   descricao: string;
