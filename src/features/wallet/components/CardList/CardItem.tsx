@@ -21,6 +21,13 @@ const CardItem: React.FC<CardItemProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const valorGasto = card.limit - availableLimit;
+  const percentualGasto = (valorGasto / card.limit) * 100;
+
+  let faturaColor = '';
+  if (percentualGasto <= 50) faturaColor = 'text-emerald-400';
+  else if (percentualGasto <= 80) faturaColor = 'text-amber-400';
+  else faturaColor = 'text-red-400';
   // Use apenas os props recebidos:
   return (
     <>
@@ -118,7 +125,7 @@ const CardItem: React.FC<CardItemProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-sm text-gray-400">Fatura atual</p>
-            <p className="text-lg font-semibold">
+            <p className={`text-lg font-semibold ${faturaColor}`}>
               R$ {currentInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </div>
@@ -146,7 +153,7 @@ const CardItem: React.FC<CardItemProps> = ({
             className="text-sm text-emerald-400 hover:underline px-2 py-1"
             type="button"
           >
-            + Details
+            + Detalhes
           </button>
           <button
             onClick={(e) => {
@@ -156,7 +163,7 @@ const CardItem: React.FC<CardItemProps> = ({
             className="text-sm text-blue-400 hover:underline px-2 py-1"
             type="button"
           >
-            Edit
+            Editar
           </button>
           <button
             onClick={(e) => {
@@ -166,7 +173,7 @@ const CardItem: React.FC<CardItemProps> = ({
             className="text-sm text-red-400 hover:underline px-2 py-1"
             type="button"
           >
-            Delete
+            Excluir
           </button>
         </div>
       </div>

@@ -7,7 +7,9 @@ import {
   History, 
   X, 
   Search,
-  Filter
+  Filter,
+  Building2,
+  CreditCard
 } from 'lucide-react';
 
 const TransactionHistory: React.FC = () => {
@@ -292,7 +294,7 @@ const TransactionHistory: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {currentTransactions.map(transaction => (
-                    <TransactionItem key={transaction.id} transaction={transaction} />
+                    <TransactionItem key={transaction.id} transaction={transaction} showBankOrCardIcon />
                   ))}
                 </div>
               )}
@@ -334,7 +336,7 @@ const TransactionHistory: React.FC = () => {
           </div>
           <div className="space-y-2">
             {transactions.slice(0, 3).map(transaction => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
+              <TransactionItem key={transaction.id} transaction={transaction} showBankOrCardIcon />
             ))}
             {transactions.length > 3 && (
               <button

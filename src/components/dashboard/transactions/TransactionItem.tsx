@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpCircle, ArrowDownCircle, Trash2, Edit, MoreVertical } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, Trash2, Edit, MoreVertical, Building2, CreditCard } from 'lucide-react';
 import { Transaction } from '../../../types';
 import { useTransactions } from '../../../context/TransactionsContext';
 import { formatCurrency, formatDate } from '../../../utils/formatters';
@@ -9,9 +9,10 @@ import TransactionEditModal from './TransactionEditModal';
 
 interface TransactionItemProps {
   transaction: Transaction;
+  showBankOrCardIcon?: boolean; // NOVA PROP
 }
 
-const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
+const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBankOrCardIcon }) => {
   const { deleteTransaction, editTransaction } = useTransactions();
   const { id, description, amount, type, date } = transaction;
   const { getAccountById } = useAccounts();
@@ -57,10 +58,18 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
               ? 'bg-emerald-900/30'
               : 'bg-red-900/30'
             }`}>
-            {type === 'income' ? (
-              <ArrowUpCircle className="w-5 h-5 text-emerald-500" />
+            {showBankOrCardIcon ? (
+              transaction.card_id ? (
+                <CreditCard className={`w-5 h-5 ${type === 'income' ? 'text-emerald-500' : 'text-red-500'}`} />
+              ) : (
+                <Building2 className={`w-5 h-5 ${type === 'income' ? 'text-emerald-500' : 'text-red-500'}`} />
+              )
             ) : (
-              <ArrowDownCircle className="w-5 h-5 text-red-500" />
+              type === 'income' ? (
+                <ArrowUpCircle className="w-5 h-5 text-emerald-500" />
+              ) : (
+                <ArrowDownCircle className="w-5 h-5 text-red-500" />
+              )
             )}
           </div>
           {iconUrl && (
@@ -107,10 +116,18 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
                 ? 'bg-emerald-900/30'
                 : 'bg-red-900/30'
               }`}>
-              {type === 'income' ? (
-                <ArrowUpCircle className="w-5 h-5 text-emerald-500" />
+              {showBankOrCardIcon ? (
+                transaction.card_id ? (
+                  <CreditCard className={`w-5 h-5 ${type === 'income' ? 'text-emerald-500' : 'text-red-500'}`} />
+                ) : (
+                  <Building2 className={`w-5 h-5 ${type === 'income' ? 'text-emerald-500' : 'text-red-500'}`} />
+                )
               ) : (
-                <ArrowDownCircle className="w-5 h-5 text-red-500" />
+                type === 'income' ? (
+                  <ArrowUpCircle className="w-5 h-5 text-emerald-500" />
+                ) : (
+                  <ArrowDownCircle className="w-5 h-5 text-red-500" />
+                )
               )}
             </div>
             {iconUrl && (
