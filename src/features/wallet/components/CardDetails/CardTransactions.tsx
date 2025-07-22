@@ -32,8 +32,10 @@ const CardTransactions: React.FC<CardTransactionsProps> = ({ cardId, onClose }) 
         descricao: t.description,
         valor: t.amount,
         data: t.date,
-        categoria: t.type,
-        status: t.type === 'expense' ? 'pago' : 'pendente'
+        // categoria: t.type,
+        // status: t.type === 'expense' ? 'pago' : 'pendente'
+        categoria: t.description, // ou outro campo existente, se fizer sentido
+        status: 'pago' // valor padrão, já que não há campo para diferenciar
       })) || []);
     };
     

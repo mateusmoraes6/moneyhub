@@ -76,16 +76,12 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
               size="lg"
             />
             <div>
-              <p className="text-sm text-gray-400">{cardData.bank_name}</p>
               <div className="flex items-center gap-2 mt-2">
                 <LimitDonutChart
                   limiteTotal={limitTotal}
                   limiteDisponivel={availableLimit}
                   size={40}
                 />
-                <span className="text-xs text-gray-400">
-                  Limite usado: <span className="font-bold text-white">{percentUsed}%</span>
-                </span>
                 <span className="text-xs text-gray-400">
                   (R$ {limitUsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {limitTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
                 </span>

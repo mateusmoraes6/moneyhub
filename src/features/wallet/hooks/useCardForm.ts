@@ -3,12 +3,11 @@ import { CardFormValues } from '../types';
 import { supabase } from '../../../supabaseClient';
 
 const initialForm: CardFormValues = {
-  nome_banco: '',
-  icone_url: '',
-  limite_total: 0,
-  limite_disponivel: 0,
-  data_fechamento: 1,
-  data_vencimento: 1,
+  bank_name: '',
+  limit: 0,
+  available_limit: 0,
+  closing_day: 1,
+  due_day: 1,
 };
 
 export function useCardForm(initial = initialForm) {
@@ -20,7 +19,9 @@ export function useCardForm(initial = initialForm) {
     const { name, value } = e.target;
     setForm(prev => ({
       ...prev,
-      [name]: name.includes('limite') || name.includes('data') ? Number(value) : value,
+      [name]: ['limit', 'available_limit', 'closing_day', 'due_day'].includes(name)
+        ? Number(value)
+        : value,
     }));
   };
 
@@ -36,18 +37,18 @@ export function useCardForm(initial = initialForm) {
         .from('cards')
         .insert([{
           user_id: userId,
-          bank_name: form.nome_banco,
-          limit: form.limite_total,
-          available_limit: form.limite_disponivel,
-          closing_day: form.data_fechamento,
-          due_day: form.data_vencimento,
+          bank_name: form.bank_name,
+          limit: form.limit,
+          available_limit: form.available_limit,
+          closing_day: form.closing_day,
+          due_day: form.due_day,
         }])
         .select();
       
       if (error) throw error;
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar cartão');
+      setError(err instanceof Error ? err.message : 'Error saving card');
       return null;
     } finally {
       setLoading(false);

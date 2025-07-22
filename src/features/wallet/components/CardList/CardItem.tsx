@@ -109,6 +109,10 @@ const CardItem: React.FC<CardItemProps> = ({
           <p className="text-sm text-gray-500">
             Limite total: R$ {card.limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
+          Limite utilizado
+          <p className="text-sm text-gray-400 mt-1">
+            Limite utilizado: R$ {limitUsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
         </div>
 
         {/* Bloco 3 e 4 — Fatura atual e Gráfico */}
