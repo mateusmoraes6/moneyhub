@@ -29,13 +29,11 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   const getDisplayData = (card: Card) => {
     const bankName = card.bank_name;
     const iconUrl = `/icons/${normalizeBankName(card.bank_name)}.svg`;
-    const extraInfo = `Available limit: R$ ${
-      typeof card.available_limit === 'number'
-        ? card.available_limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-        : '-'
-    }`;
+    const availableLimit = typeof card.available_limit === 'number' ? card.available_limit : 0;
+    const extraInfo = `Limite: R$ ${availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    const limitColor = availableLimit >= 0 ? 'text-emerald-400' : 'text-red-400';
 
-    return { bankName, iconUrl, extraInfo };
+    return { bankName, iconUrl, extraInfo, limitColor };
   };
 
   const selectedCardData = selectedCard ? getDisplayData(selectedCard) : null;
@@ -72,7 +70,7 @@ const CardSelector: React.FC<CardSelectorProps> = ({
           <span className={selectedCard ? 'text-white' : 'text-gray-400'}>
             {selectedCardData
               ? selectedCardData.bankName
-              : 'Select a card'
+              : 'Selecione um cartão'
             }
           </span>
         </div>
@@ -112,7 +110,9 @@ const CardSelector: React.FC<CardSelectorProps> = ({
                     <p className="text-white font-medium">
                       {cardData.bankName}
                     </p>
-                    <p className="text-sm text-gray-400">{cardData.extraInfo}</p>
+                    <p className={`text-sm ${cardData.limitColor}`}>
+                      {cardData.extraInfo}
+                    </p>
                   </div>
                 </button>
               );
