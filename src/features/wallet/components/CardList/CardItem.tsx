@@ -101,18 +101,17 @@ const CardItem: React.FC<CardItemProps> = ({
         </div>
 
         {/* Bloco 2 — Limite disponível */}
-        <div className="mb-3">
-          <p className="text-sm text-gray-400">Limite disponível</p>
-          <p className="text-xl font-semibold text-emerald-400">
-            R$ {availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
-          <p className="text-sm text-gray-500">
-            Limite total: R$ {card.limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
-          Limite utilizado
-          <p className="text-sm text-gray-400 mt-1">
-            Limite utilizado: R$ {limitUsed.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </p>
+        <div className="mb-3 space-y-1">
+          {/* Limite disponível */}
+          <div>
+            <p className="text-xs text-gray-400">Limite disponível</p>
+            <p className={`text-lg font-bold ${availableLimit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              R$ {availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-gray-500">
+              Limite total: R$ {card.limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+          </div>
         </div>
 
         {/* Bloco 3 e 4 — Fatura atual e Gráfico */}
@@ -133,7 +132,7 @@ const CardItem: React.FC<CardItemProps> = ({
         {/* Bloco 5 — Fechamento e Vencimento */}
         <div className="mb-4">
           <p className="text-xs text-gray-500">
-            Closing: day {card.closing_day} | Due: day {card.due_day}
+            Fechamento: dia {card.closing_day} | Vencimento: dia {card.due_day}
           </p>
         </div>
 

@@ -258,6 +258,20 @@ const TransactionForm: React.FC = () => {
     );
   }
 
+  const { transactions } = useTransactions();
+
+  // Recalcula o limite disponível de cada cartão
+  const cardsWithAvailableLimit = cards.map(card => {
+    const limitTotal = Number(card.limit) || 0;
+    const cardTransactions = transactions.filter(t => t.card_id === card.id);
+    const currentInvoice = cardTransactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+    const availableLimit = limitTotal - currentInvoice;
+    return {
+      ...card,
+      available_limit: availableLimit,
+    };
+  });
+
   return (
     <>
       {/* Botão para abrir o modal de nova transação */}
@@ -424,7 +438,7 @@ const TransactionForm: React.FC = () => {
                   ) : (
                     <>
                       <CardSelector
-                        cards={cards}
+                        cards={cardsWithAvailableLimit}
                         selectedId={cardId}
                         onSelect={setCardId}
                       />

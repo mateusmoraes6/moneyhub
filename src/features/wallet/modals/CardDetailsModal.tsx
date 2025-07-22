@@ -182,10 +182,10 @@ const CardDetailsModal: React.FC<CardDetailsModalProps> = ({ isOpen, onClose, ca
                     {parcelamento.parcels?.map((parcela: InstallmentParcel, idx: number) => (
                       <div key={idx} className="flex justify-between text-xs">
                         <span>
-                          Installment {idx + 1} - {new Date(parcela.date).toLocaleDateString('pt-BR')}
+                          Parcela {idx + 1} - {new Date(parcela.date).toLocaleDateString('pt-BR')}
                         </span>
                         <span className={parcela.status === 'paid' ? 'text-emerald-400' : 'text-yellow-400'}>
-                          R$ {parcela.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - {parcela.status === 'paid' ? 'Paid' : 'Pending'}
+                          R$ {parcela.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} - {parcela.status === 'paid' ? 'Pago' : 'Pendente'}
                         </span>
                       </div>
                     ))}
