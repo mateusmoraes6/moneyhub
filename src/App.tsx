@@ -7,6 +7,7 @@ import Login from './pages/auth/Login';
 import PrivateRoute from './components/auth/navigation/PrivateRoute';
 import Wallet from './pages/wallet/Wallet';
 import BankAccounts from './pages/bank-accounts/BankAccounts';
+import FutureTransactions from './pages/future-transactions/FutureTransactions';
 import { AccountsProvider } from './context/AccountsContext';
 
 function App() {
@@ -39,6 +40,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <BankAccounts />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/future-transactions"
+                element={
+                  <PrivateRoute>
+                    <FutureTransactions />
                   </PrivateRoute>
                 }
               />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, X, LogOut, LayoutDashboard, CreditCard, Building2 } from 'lucide-react';
+import { Wallet, X, LogOut, LayoutDashboard, CreditCard, Building2, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
@@ -23,6 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { path: '/', label: 'Visão Geral', icon: LayoutDashboard },
         { path: '/bank-accounts', label: 'Contas Bancárias', icon: Building2 },
         { path: '/wallet', label: 'Cartões de Crédito', icon: CreditCard },
+        { path: '/future-transactions', label: 'Lançamentos Futuros', icon: Calendar },
     ];
 
     const isActive = (path: string) => {
