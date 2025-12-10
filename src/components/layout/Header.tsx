@@ -1,101 +1,53 @@
 import React, { useState } from 'react';
-import { Wallet, LogIn, LogOut, Menu } from 'lucide-react';
+import { Wallet, LogIn, Menu } from 'lucide-react';
 import { useTransactions } from '../../context/TransactionsContext';
-import { supabase } from '../../supabaseClient';
 import AuthModal from '../auth/modals/AuthModal';
-import Sidebar from './Sidebar';
-import { Link } from 'react-router-dom';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenSidebar?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
   const { isAuthenticated } = useTransactions();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
 
   const handleLogin = () => setIsAuthModalOpen(true);
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-20 bg-gray-900/50 backdrop-blur-md shadow-sm border-b border-gray-800">
+      <header className="sticky top-0 left-0 w-full z-20 bg-gray-900/50 backdrop-blur-md shadow-sm border-b border-gray-800 lg:hidden">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           {/* Mobile: Ícone de menu */}
           <button
-            className="md:hidden p-2"
+            className="p-2 -ml-2 hover:bg-gray-800 rounded-lg transition-colors"
             aria-label="Abrir menu"
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={onOpenSidebar}
           >
             <Menu className="w-6 h-6 text-emerald-500" />
           </button>
 
-          {/* Desktop: Logo + Nome */}
-          <div className="hidden md:flex items-center space-x-4"></div>
-          {/* Esquerda: Logo + Nome */}
+          {/* Mobile: Logo + Nome */}
           <div className="flex items-center space-x-2">
-            <div className="bg-emerald-500 rounded-full p-2">
-              <Wallet className="h-6 w-6 text-white" />
+            <div className="bg-emerald-500 rounded-full p-1.5">
+              <Wallet className="h-5 w-5 text-white" />
             </div>
-            {/* <h1 className="text-xl font-semibold text-white">MoneyHub</h1> */}
+            <span className="text-lg font-semibold text-white">MoneyHub</span>
           </div>
 
-          {/* Centro: Navegação */}
-          <div className="hidden md:flex flex-1 justify-center space-x-6">
-            <Link
-              to="/"
-              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
-            >
-              Visão Geral
-            </Link>
-            <Link
-              to="/bank-accounts"
-              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
-            >
-              Contas Bancárias
-            </Link>
-            <Link
-              to="/wallet"
-              className="text-emerald-400 hover:text-emerald-300 font-medium transition"
-            >
-              Cartões de Crédito
-            </Link>
-          </div>
-
-          {/* Direita: Login/Logout */}
-          <div className="hidden md:block">
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sair</span>
-              </button>
-            ) : (
+          {/* Mobile: Placeholder / Login Action */}
+          <div>
+            {!isAuthenticated && (
               <button
                 onClick={handleLogin}
-                className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+                className="p-2 text-emerald-500 hover:text-emerald-400"
               >
-                <LogIn className="w-4 h-4" />
-                <span>Entrar</span>
+                <LogIn className="w-5 h-5" />
               </button>
             )}
+            {/* If authenticated, logout is in sidebar, but we can keep a small indicator or nothing here */}
           </div>
         </div>
       </header>
-
-      {/* Sidebar Mobile */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        isAuthenticated={isAuthenticated}
-        onLogin={() => {
-          setIsSidebarOpen(false);
-          setIsAuthModalOpen(true);
-        }}
-        onLogout={handleLogout}
-      />
 
       {/* Modal de autenticação */}
       <AuthModal

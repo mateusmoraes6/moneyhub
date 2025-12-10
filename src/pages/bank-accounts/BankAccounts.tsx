@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import Header from '../../components/layout/Header';
 import { Building2, Plus } from 'lucide-react';
 import AccountDetailsModal from '../../features/bank-accounts/modals/AccountDetailsModal';
 import AddAccountModal from '../../features/bank-accounts/modals/AddAccountModal';
@@ -39,11 +38,11 @@ const BankAccounts: React.FC = () => {
 
   const selectedAccountData = selectedAccount
     ? {
-        id: selectedAccount.id,
-        bank_name: selectedAccount.nome_banco,
-        balance: selectedAccount.saldo,
-        created_at: '',
-      }
+      id: selectedAccount.id,
+      bank_name: selectedAccount.nome_banco,
+      balance: selectedAccount.saldo,
+      created_at: '',
+    }
     : null;
 
   const selectedAccountDetails = useAccountDetails(selectedAccountData, transactions);
@@ -121,7 +120,7 @@ const BankAccounts: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="h-full bg-gray-950 flex items-center justify-center">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
           <p className="mt-4">Carregando contas...</p>
@@ -131,75 +130,71 @@ const BankAccounts: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 transition-colors duration-300">
-      <Header />
-
-      <main className="container mt-12 pt-16 mx-auto px-4 py-6 max-w-4xl">
-        <div className="space-y-6">
-          <div className="flex items-center space-x-3">
-            <div className="bg-emerald-500 rounded-full p-2">
-              <Building2 className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-2xl font-semibold text-white">Contas Bancárias</h1>
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3">
+          <div className="bg-emerald-500 rounded-full p-2">
+            <Building2 className="h-6 w-6 text-white" />
           </div>
-
-          <div className="flex justify-between items-center">
-            {/* <div className="text-left"> */}
-            <p className="text-sm text-gray-400">Saldo Total</p>
-            <p className="text-xl font-bold text-emerald-400">
-              {formatCurrency(totalBalance)}
-            </p>
-            {/* </div> */}
-          </div>
-
-          <AccountList
-            accounts={formattedAccounts}
-            onEdit={handleUpdateAccount}
-            onDelete={handleDeleteAccount}
-            onViewDetails={openAccountDetails}
-          />
+          <h1 className="text-2xl font-semibold text-white">Contas Bancárias</h1>
         </div>
 
-        <div className="flex justify-center mt-8">
-          <button
-            onClick={openAddAccount}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium text-sm flex items-center gap-2 shadow"
-          >
-            <Plus className="w-4 h-4" />
-            Adicionar Conta
-          </button>
+        <div className="flex justify-between items-center">
+          {/* <div className="text-left"> */}
+          <p className="text-sm text-gray-400">Saldo Total</p>
+          <p className="text-xl font-bold text-emerald-400">
+            {formatCurrency(totalBalance)}
+          </p>
+          {/* </div> */}
         </div>
 
-        {selectedAccountDetails && (
-          <AccountDetailsModal
-            isOpen={isModalOpen}
-            onClose={closeAccountDetails}
-            account={selectedAccountDetails}
-          />
-        )}
-
-        <AddAccountModal
-          isOpen={isAddModalOpen}
-          onClose={closeAddAccount}
-          onSave={handleAddAccount}
+        <AccountList
+          accounts={formattedAccounts}
+          onEdit={handleUpdateAccount}
+          onDelete={handleDeleteAccount}
+          onViewDetails={openAccountDetails}
         />
+      </div>
 
-        <ConfirmModal
-          isOpen={isConfirmOpen}
-          title="Confirmar Exclusão"
-          description="Tem certeza que deseja excluir esta conta?"
-          onConfirm={confirmDelete}
-          onCancel={() => { setIsConfirmOpen(false); setAccountToDelete(null); }}
-        />
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={openAddAccount}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium text-sm flex items-center gap-2 shadow"
+        >
+          <Plus className="w-4 h-4" />
+          Adicionar Conta
+        </button>
+      </div>
 
-        <ConfirmModal
-          isOpen={isEditConfirmOpen}
-          title="Confirmar Edição"
-          description="Tem certeza que deseja modificar as informações desta conta bancária?"
-          onConfirm={confirmEdit}
-          onCancel={() => { setIsEditConfirmOpen(false); setPendingEditData(null); }}
+      {selectedAccountDetails && (
+        <AccountDetailsModal
+          isOpen={isModalOpen}
+          onClose={closeAccountDetails}
+          account={selectedAccountDetails}
         />
-      </main>
+      )}
+
+      <AddAccountModal
+        isOpen={isAddModalOpen}
+        onClose={closeAddAccount}
+        onSave={handleAddAccount}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Confirmar Exclusão"
+        description="Tem certeza que deseja excluir esta conta?"
+        onConfirm={confirmDelete}
+        onCancel={() => { setIsConfirmOpen(false); setAccountToDelete(null); }}
+      />
+
+      <ConfirmModal
+        isOpen={isEditConfirmOpen}
+        title="Confirmar Edição"
+        description="Tem certeza que deseja modificar as informações desta conta bancária?"
+        onConfirm={confirmEdit}
+        onCancel={() => { setIsEditConfirmOpen(false); setPendingEditData(null); }}
+      />
     </div>
   );
 };

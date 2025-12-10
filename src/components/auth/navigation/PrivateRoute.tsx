@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTransactions } from '../../../context/TransactionsContext';
+import MainLayout from '../../layout/MainLayout';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return <MainLayout>{children}</MainLayout>;
 };
 
 export default PrivateRoute;

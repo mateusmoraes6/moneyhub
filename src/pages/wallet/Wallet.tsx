@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
 import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
-import Header from '../../components/layout/Header';
 import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
 import { useTransactions } from '../../context/TransactionsContext';
 import { Card, CardFormValues } from '../../features/wallet/types/card';
@@ -67,119 +66,114 @@ const Wallet: React.FC = () => {
     setSelectedCard(null);
   };
 
-  // if (loading) return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">Carregando...</div>;
-  if (error) return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400">Erro: {error}</div>;
+  if (error) return <div className="h-full bg-gray-950 flex items-center justify-center text-red-400">Erro: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-950 transition-colors duration-300 pb-20">
-      <Header />
-
-      <main className="container mt-12 pt-6 mx-auto px-4 py-6 max-w-6xl">
-        {/* Page Title & Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Carteira</h1>
-            <p className="text-gray-400">Gerencie seus cartões de crédito e limites</p>
-          </div>
-          <button
-            onClick={handleAdd}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
-          >
-            <Plus className="w-5 h-5" />
-            Adicionar Cartão
-          </button>
-        </div>
-
-        {/* Global Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-            <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <WalletIcon className="w-24 h-24 text-blue-500" />
-            </div>
-            <p className="text-sm font-medium text-gray-400 mb-1">Limite Total</p>
-            <h3 className="text-2xl font-bold text-white">{formatCurrency(stats.totalLimit)}</h3>
-          </div>
-
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-            <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <CreditCard className="w-24 h-24 text-emerald-500" />
-            </div>
-            <p className="text-sm font-medium text-gray-400 mb-1">Limite Disponível</p>
-            <h3 className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.totalAvailable)}</h3>
-          </div>
-
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-            <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingUp className="w-24 h-24 text-amber-500" />
-            </div>
-            <p className="text-sm font-medium text-gray-400 mb-1">Limite Utilizado</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-2xl font-bold text-amber-400">{formatCurrency(stats.totalUsed)}</h3>
-              <span className="text-sm text-gray-500 mb-1">({Math.round(stats.usagePercent)}%)</span>
-            </div>
-            <div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
-              <div
-                className="bg-amber-500 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${stats.usagePercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Cards Grid */}
+    <div className="container mx-auto px-4 py-6 max-w-6xl pb-20">
+      {/* Page Title & Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-gray-400" />
-            Meus Cartões
-          </h2>
+          <h1 className="text-3xl font-bold text-white mb-2">Carteira</h1>
+          <p className="text-gray-400">Gerencie seus cartões de crédito e limites</p>
+        </div>
+        <button
+          onClick={handleAdd}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
+        >
+          <Plus className="w-5 h-5" />
+          Adicionar Cartão
+        </button>
+      </div>
 
-          {cards.length === 0 ? (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center">
-              <div className="bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CreditCard className="w-8 h-8 text-gray-600" />
-              </div>
-              <h3 className="text-lg font-medium text-white mb-2">Nenhum cartão cadastrado</h3>
-              <p className="text-gray-400 mb-6 max-w-sm mx-auto">Adicione seus cartões de crédito para controlar seus limites e faturas em um só lugar.</p>
-              <button
-                onClick={handleAdd}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-              >
-                Adicionar Cartão Agora
-              </button>
-            </div>
-          ) : (
-            <CreditCardList
-              cards={cards}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onSelect={handleSelect}
-            />
-          )}
+      {/* Global Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
+          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <WalletIcon className="w-24 h-24 text-blue-500" />
+          </div>
+          <p className="text-sm font-medium text-gray-400 mb-1">Limite Total</p>
+          <h3 className="text-2xl font-bold text-white">{formatCurrency(stats.totalLimit)}</h3>
         </div>
 
-        {/* Form Modal */}
-        <CreditCardFormModal
-          isOpen={showModal}
-          onClose={() => {
-            setShowModal(false);
-            setIsEditing(false);
-            setSelectedCard(null);
-          }}
-          onSave={handleSave}
-          initialValues={isEditing && selectedCard ? selectedCard : undefined}
-        />
+        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
+          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <CreditCard className="w-24 h-24 text-emerald-500" />
+          </div>
+          <p className="text-sm font-medium text-gray-400 mb-1">Limite Disponível</p>
+          <h3 className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.totalAvailable)}</h3>
+        </div>
 
-        {/* Transactions Detail Modal */}
-        {showTransactions && selectedCard && (
-          <CardTransactions
-            cardId={selectedCard.id}
-            onClose={() => {
-              setShowTransactions(false);
-              setSelectedCard(null);
-            }}
+        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
+          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <TrendingUp className="w-24 h-24 text-amber-500" />
+          </div>
+          <p className="text-sm font-medium text-gray-400 mb-1">Limite Utilizado</p>
+          <div className="flex items-end gap-2">
+            <h3 className="text-2xl font-bold text-amber-400">{formatCurrency(stats.totalUsed)}</h3>
+            <span className="text-sm text-gray-500 mb-1">({Math.round(stats.usagePercent)}%)</span>
+          </div>
+          <div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
+            <div
+              className="bg-amber-500 h-full rounded-full transition-all duration-1000"
+              style={{ width: `${stats.usagePercent}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Cards Grid */}
+      <div>
+        <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-gray-400" />
+          Meus Cartões
+        </h2>
+
+        {cards.length === 0 ? (
+          <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center">
+            <div className="bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-8 h-8 text-gray-600" />
+            </div>
+            <h3 className="text-lg font-medium text-white mb-2">Nenhum cartão cadastrado</h3>
+            <p className="text-gray-400 mb-6 max-w-sm mx-auto">Adicione seus cartões de crédito para controlar seus limites e faturas em um só lugar.</p>
+            <button
+              onClick={handleAdd}
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+            >
+              Adicionar Cartão Agora
+            </button>
+          </div>
+        ) : (
+          <CreditCardList
+            cards={cards}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSelect={handleSelect}
           />
         )}
-      </main>
+      </div>
+
+      {/* Form Modal */}
+      <CreditCardFormModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setIsEditing(false);
+          setSelectedCard(null);
+        }}
+        onSave={handleSave}
+        initialValues={isEditing && selectedCard ? selectedCard : undefined}
+      />
+
+      {/* Transactions Detail Modal */}
+      {showTransactions && selectedCard && (
+        <CardTransactions
+          cardId={selectedCard.id}
+          onClose={() => {
+            setShowTransactions(false);
+            setSelectedCard(null);
+          }}
+        />
+      )}
     </div>
   );
 };
