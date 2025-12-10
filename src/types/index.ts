@@ -17,6 +17,7 @@ export interface Transaction {
   installment_num?: number;
   status: 'pending' | 'paid' | 'overdue';
   due_date?: string;
+  isGrouped?: boolean;
 }
 
 export type EditableTransactionFields = Omit<Transaction, 'id' | 'created_at' | 'user_id'>;

@@ -11,8 +11,8 @@ interface TransactionSummary {
 interface TransactionsContextType {
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
-  editTransaction: (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
+  editTransaction: (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>, isGrouped?: boolean) => Promise<void>;
+  deleteTransaction: (id: string, isGrouped?: boolean) => Promise<void>;
   loading: boolean;
   error: string | null;
   summary: TransactionSummary;
@@ -115,7 +115,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .single();
 
       if (error) throw error;
-      
+
       setTransactions(prev => [data as Transaction, ...prev]);
     } catch (err) {
       console.error('Error adding transaction:', err);
@@ -124,22 +124,44 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const editTransaction = async (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => {
+  const editTransaction = async (id: string, transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>, isGrouped: boolean = false) => {
     try {
       setError(null);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Please sign in to edit transactions');
 
-      const { data, error } = await supabase
-        .from('transactions')
-        .update(transaction)
-        .eq('id', id)
-        .select()
-        .single();
+      if (isGrouped) {
+        // Se for agrupada, não permitir atualização de valor ou data diretamente para evitar corrupção
+        // (ex: atualizar todas as parcelas com o valor total da compra)
+        // Apenas metadados (categoria, descrição, status, payment_method) são propagados com segurança.
+        const { amount, date, ...safeUpdate } = transaction;
 
-      if (error) throw error;
+        // Se for agrupada, 'id' deve ser interpretado como 'installment_id'
+        const { error } = await supabase
+          .from('transactions')
+          .update(safeUpdate)
+          .eq('installment_id', id);
 
-      setTransactions(prev => prev.map(item => item.id === id ? (data as Transaction) : item));
+        if (error) throw error;
+
+        // Atualizar TODAS as transações que correspondem a este installment_id no estado local
+        // Nota: Mantemos o valor original (item.amount) mas atualizamos os metadados
+        setTransactions(prev => prev.map(item =>
+          item.installment_id === id
+            ? { ...item, ...safeUpdate }
+            : item
+        ));
+      } else {
+        const { data, error } = await supabase
+          .from('transactions')
+          .update(transaction)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        setTransactions(prev => prev.map(item => item.id === id ? (data as Transaction) : item));
+      }
     } catch (err) {
       console.error('Error editing transaction:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -147,17 +169,29 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const deleteTransaction = async (id: string) => {
+  const deleteTransaction = async (id: string, isGrouped: boolean = false) => {
     try {
       setError(null);
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', id);
+
+      let query = supabase.from('transactions').delete();
+
+      if (isGrouped) {
+        // Se for agrupado, deleta todas as parcelas usando installment_id
+        query = query.eq('installment_id', id);
+      } else {
+        query = query.eq('id', id);
+      }
+
+      const { error } = await query;
 
       if (error) throw error;
 
-      setTransactions(prev => prev.filter(transaction => transaction.id !== id));
+      setTransactions(prev => {
+        if (isGrouped) {
+          return prev.filter(t => t.installment_id !== id);
+        }
+        return prev.filter(transaction => transaction.id !== id);
+      });
     } catch (err) {
       console.error('Error deleting transaction:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -167,7 +201,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Calculate financial summary from transactions
   const summary = useMemo(() => {
     const initialSummary = { income: 0, expenses: 0, balance: 0 };
-    
+
     return transactions.reduce((acc, transaction) => {
       const amount = Number(transaction.amount);
       if (transaction.type === 'income') {
@@ -201,13 +235,13 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   return (
-    <TransactionsContext.Provider value={{ 
-      transactions, 
+    <TransactionsContext.Provider value={{
+      transactions,
       addTransaction,
       editTransaction,
       deleteTransaction,
-      loading, 
-      error, 
+      loading,
+      error,
       summary,
       isAuthenticated,
       user,

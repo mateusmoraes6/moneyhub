@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useTransactions } from '../../../context/TransactionsContext';
 import TransactionItem from './TransactionItem';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  History, 
-  X, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  History,
+  X,
   Search,
   Filter,
 } from 'lucide-react';
+import { groupTransactions } from '../../../utils/transactionUtils';
 
 const TransactionHistory: React.FC = () => {
   const { transactions } = useTransactions();
@@ -20,7 +21,7 @@ const TransactionHistory: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  
+
   const ITEMS_PER_PAGE = 5;
 
   // Formatar data para exibição em português
@@ -37,15 +38,15 @@ const TransactionHistory: React.FC = () => {
   const getMonthOptions = () => {
     const options = [];
     const currentDate = new Date();
-    
+
     for (let i = 0; i < 12; i++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const monthYear = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
       const value = date.toISOString().slice(0, 7); // formato YYYY-MM
-      
+
       options.push({ label: monthYear, value });
     }
-    
+
     return options;
   };
 
@@ -54,33 +55,40 @@ const TransactionHistory: React.FC = () => {
     return transactions.filter(transaction => {
       // Filtro por tipo (receita/despesa)
       if (filterType && transaction.type !== filterType) return false;
-      
+
       // Filtro por texto de busca
       if (searchQuery && !transaction.description.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      
+
       // Filtro por mês específico
       if (selectedMonth) {
         const transactionMonth = transaction.date.slice(0, 7);
         if (transactionMonth !== selectedMonth) return false;
       }
-      
+
       // Filtro por intervalo de datas
       if (startDate && endDate) {
         const transactionDate = new Date(transaction.date);
         const start = new Date(startDate);
         const end = new Date(endDate);
         end.setHours(23, 59, 59); // Incluir o dia inteiro
-        
+
         if (transactionDate < start || transactionDate > end) return false;
       }
-      
+
       return true;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 
-  const filteredTransactions = getFilteredTransactions();
+  const rawFilteredTransactions = getFilteredTransactions();
+
+  // Agrupar transações se não houver filtro de data específico (mês ou intervalo)
+  // Isso melhora a visualização de compras parceladas
+  const shouldGroup = !selectedMonth && !startDate && !endDate;
+  const filteredTransactions = shouldGroup
+    ? groupTransactions(rawFilteredTransactions)
+    : rawFilteredTransactions;
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
   const currentTransactions = filteredTransactions.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -121,7 +129,7 @@ const TransactionHistory: React.FC = () => {
             {/* Cabeçalho da modal */}
             <div className="flex items-center justify-between p-4 border-b border-gray-800">
               <h2 className="text-lg font-semibold text-white">Histórico de Transações</h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 text-gray-400 hover:text-gray-300"
               >
@@ -156,11 +164,10 @@ const TransactionHistory: React.FC = () => {
                       setFilterType(null);
                       setCurrentPage(1);
                     }}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${
-                      filterType === null
-                        ? 'bg-gray-700 text-white'
-                        : 'bg-gray-800 text-gray-400'
-                    }`}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${filterType === null
+                      ? 'bg-gray-700 text-white'
+                      : 'bg-gray-800 text-gray-400'
+                      }`}
                   >
                     Todos
                   </button>
@@ -169,11 +176,10 @@ const TransactionHistory: React.FC = () => {
                       setFilterType('income');
                       setCurrentPage(1);
                     }}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${
-                      filterType === 'income'
-                        ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-500'
-                        : 'bg-gray-800 text-gray-400'
-                    }`}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${filterType === 'income'
+                      ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-500'
+                      : 'bg-gray-800 text-gray-400'
+                      }`}
                   >
                     Receitas
                   </button>
@@ -182,11 +188,10 @@ const TransactionHistory: React.FC = () => {
                       setFilterType('expense');
                       setCurrentPage(1);
                     }}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${
-                      filterType === 'expense'
-                        ? 'bg-red-900/40 text-red-300 border border-red-500'
-                        : 'bg-gray-800 text-gray-400'
-                    }`}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium ${filterType === 'expense'
+                      ? 'bg-red-900/40 text-red-300 border border-red-500'
+                      : 'bg-gray-800 text-gray-400'
+                      }`}
                   >
                     Despesas
                   </button>
@@ -308,11 +313,11 @@ const TransactionHistory: React.FC = () => {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                
+
                 <span className="text-sm text-gray-400">
                   Página {currentPage} de {totalPages}
                 </span>
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
@@ -333,7 +338,7 @@ const TransactionHistory: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-400">Transações Recentes</h3>
           </div>
           <div className="space-y-2">
-            {transactions.slice(0, 3).map(transaction => (
+            {groupTransactions(transactions).slice(0, 3).map(transaction => (
               <TransactionItem key={transaction.id} transaction={transaction} showBankOrCardIcon />
             ))}
             {transactions.length > 3 && (

@@ -14,12 +14,16 @@ interface TransactionItemProps {
 
 const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBankOrCardIcon }) => {
   const { deleteTransaction, editTransaction } = useTransactions();
-  const { id, description, amount, type, date } = transaction;
-  const { getAccountById } = useAccounts();
+  const { id, description, amount, type, date, isGrouped } = transaction;
+  const { getAccountById, getCardById } = useAccounts();
   const account = transaction.account_id ? getAccountById(transaction.account_id) : undefined;
+  const card = transaction.card_id ? getCardById(transaction.card_id) : undefined;
   const normalizeBankName = (name: string) =>
     name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s/g, "");
-  const iconUrl = account ? `/icons/${normalizeBankName(account.bank_name)}.svg` : undefined;
+
+  const iconUrl = account
+    ? `/icons/${normalizeBankName(account.bank_name)}.svg`
+    : (card ? `/icons/${normalizeBankName(card.bank_name)}.svg` : undefined);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -32,10 +36,11 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
     editTransaction(id, {
       ...transaction,
       ...updated,
+      ...updated,
       category_id: transaction.category_id,
       payment_method: transaction.payment_method,
       status: transaction.status,
-    });
+    }, isGrouped);
     setIsEditing(false);
   };
 
@@ -55,8 +60,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
       <div className="hidden md:flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className={`p-2 rounded-full ${type === 'income'
-              ? 'bg-emerald-900/30'
-              : 'bg-red-900/30'
+            ? 'bg-emerald-900/30'
+            : 'bg-red-900/30'
             }`}>
             {showBankOrCardIcon ? (
               transaction.card_id ? (
@@ -73,7 +78,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
             )}
           </div>
           {iconUrl && (
-            <BankIcon iconUrl={iconUrl} bankName={account?.bank_name || ''} size="sm" />
+            <BankIcon iconUrl={iconUrl} bankName={account?.bank_name || card?.bank_name || ''} size="sm" />
           )}
 
           <div>
@@ -97,7 +102,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
               <Edit className="w-4 h-4" />
             </button>
             <button
-              onClick={() => deleteTransaction(id)}
+              onClick={() => deleteTransaction(id, isGrouped)}
               className="p-2 rounded-lg text-gray-500 hover:bg-gray-800 hover:text-gray-300"
               aria-label="Remover transação"
             >
@@ -113,8 +118,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2 flex-1 min-w-0">
             <div className={`flex-shrink-0 p-2 rounded-full ${type === 'income'
-                ? 'bg-emerald-900/30'
-                : 'bg-red-900/30'
+              ? 'bg-emerald-900/30'
+              : 'bg-red-900/30'
               }`}>
               {showBankOrCardIcon ? (
                 transaction.card_id ? (
@@ -131,7 +136,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
               )}
             </div>
             {iconUrl && (
-              <BankIcon iconUrl={iconUrl} bankName={account?.bank_name || ''} size="sm" />
+              <BankIcon iconUrl={iconUrl} bankName={account?.bank_name || card?.bank_name || ''} size="sm" />
             )}
 
             <div className="flex-1 min-w-0">
@@ -162,7 +167,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
                 </button>
                 <button
                   onClick={() => {
-                    deleteTransaction(id);
+                    deleteTransaction(id, isGrouped);
                     setShowActions(false);
                   }}
                   className="flex w-full items-center space-x-2 px-4 py-3 text-sm text-red-400 hover:bg-gray-700"
