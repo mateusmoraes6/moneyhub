@@ -8,8 +8,6 @@ import {
   X, 
   Search,
   Filter,
-  Building2,
-  CreditCard
 } from 'lucide-react';
 
 const TransactionHistory: React.FC = () => {

@@ -79,12 +79,42 @@ export function useWalletCards(userId?: string | null) {
   };
 
   const deleteCard = async (id: number) => {
+    // 1. Excluir transações vinculadas ao cartão
+    const { error: transError } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('card_id', id);
+
+    if (transError) {
+      console.error('Error deleting card transactions:', transError);
+      setError('Erro ao excluir transações do cartão');
+      return;
+    }
+
+    // 2. Excluir parcelamentos vinculados ao cartão
+    const { error: instError } = await supabase
+      .from('installments')
+      .delete()
+      .eq('card_id', id);
+
+    if (instError) {
+      console.error('Error deleting card installments:', instError);
+      setError('Erro ao excluir parcelamentos do cartão');
+      return;
+    }
+
+    // 3. Excluir o cartão
     const { error } = await supabase
       .from('cards')
       .delete()
       .eq('id', id);
-    if (error) setError(error.message);
-    else setCards(prev => prev.filter(card => card.id !== id));
+    
+    if (error) {
+      console.error('Error deleting card:', error);
+      setError(error.message);
+    } else {
+      setCards(prev => prev.filter(card => card.id !== id));
+    }
   };
 
   return {

@@ -13,9 +13,9 @@ const TransactionForm: React.FC = () => {
 
   const normalizeBankName = (name: string) => {
     return name
-      .normalize("NFD") 
-      .replace(/[\u0300-\u036f]/g, "") 
-      .toLowerCase() 
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
       .replace(/\s/g, "");
   };
 
@@ -51,7 +51,6 @@ const TransactionForm: React.FC = () => {
   const [category, setCategory] = useState('');
   const [accountId, setAccountId] = useState<number | undefined>(undefined);
   const [cardId, setCardId] = useState<number | undefined>(undefined);
-  const [installmentId, setInstallmentId] = useState<string | undefined>(undefined);
   const [installmentNum, setInstallmentNum] = useState<number>(1);
   const [showInstallmentOptions, setShowInstallmentOptions] = useState(false);
 
@@ -65,7 +64,6 @@ const TransactionForm: React.FC = () => {
     setCategory('');
     setAccountId(undefined);
     setCardId(undefined);
-    setInstallmentId(undefined);
     setInstallmentNum(1);
     setShowInstallmentOptions(false);
   };
@@ -83,24 +81,24 @@ const TransactionForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!description.trim()) {
       setError('Por favor, informe uma descrição');
       return;
     }
-    
+
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
       setError('Por favor, informe um valor válido maior que zero');
       return;
     }
-    
+
     if (!date) {
       setError('Por favor, selecione uma data');
       return;
     }
-    
+
     if (!category) {
       setError('Por favor, selecione uma categoria');
       return;
@@ -119,7 +117,8 @@ const TransactionForm: React.FC = () => {
         return;
       }
 
-      if (amountValue > selectedCard.available_limit) {
+      const limitToCheck = selectedCard.available_limit !== undefined ? selectedCard.available_limit : selectedCard.limit;
+      if (amountValue > limitToCheck) {
         setError('Valor excede o limite disponível do cartão');
         return;
       }
@@ -138,8 +137,8 @@ const TransactionForm: React.FC = () => {
 
     try {
       // Se for transação de crédito e parcelada, criar o parcelamento primeiro
-      let installmentId: string | undefined = undefined;
-      
+      let newInstallmentId: string | undefined = undefined;
+
       if (paymentMethod === 'credit' && installmentNum > 1) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
@@ -158,25 +157,53 @@ const TransactionForm: React.FC = () => {
           .single();
 
         if (installmentError) throw installmentError;
-        installmentId = installmentData.id;
+        newInstallmentId = installmentData.id;
       }
 
-      // Add transaction
-      await addTransaction({
-        description: description.trim(),
-        amount: amountValue,
-        type,
-        date,
-        payment_method: paymentMethod,
-        category_id: category,
-        account_id: paymentMethod === 'pix_debit' ? (accountId as number | undefined) : undefined,
-        card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
-        installment_id: installmentId,
-        installment_num: paymentMethod === 'credit' ? installmentNum : undefined,
-        status: 'pending',
-      });
+      // Logic to add transaction(s)
+      if (paymentMethod === 'credit' && installmentNum > 1 && newInstallmentId) {
+        // Split into N transactions
+        const baseAmount = Math.floor((amountValue / installmentNum) * 100) / 100;
+        const firstAmount = Number((amountValue - (baseAmount * (installmentNum - 1))).toFixed(2));
 
-      // Atualizar limite do cartão se for transação de crédito
+        for (let i = 0; i < installmentNum; i++) {
+          const instDate = new Date(date);
+          // Add months correctly handling year turnover
+          instDate.setMonth(instDate.getMonth() + i);
+          // Fix for end-of-month edge cases (e.g. Jan 31 -> Feb 28) if needed, but simple setMonth is usually acceptable for billing cycles roughly
+
+          await addTransaction({
+            description: `${description.trim()} (${i + 1}/${installmentNum})`,
+            amount: i === 0 ? firstAmount : baseAmount,
+            type,
+            date: instDate.toISOString().split('T')[0],
+            payment_method: paymentMethod,
+            category_id: category,
+            account_id: undefined,
+            card_id: cardId as number,
+            installment_id: newInstallmentId,
+            installment_num: i + 1,
+            status: 'pending',
+          });
+        }
+      } else {
+        // Single transaction (Debit, or Credit 1x)
+        await addTransaction({
+          description: description.trim(),
+          amount: amountValue,
+          type,
+          date,
+          payment_method: paymentMethod,
+          category_id: category,
+          account_id: paymentMethod === 'pix_debit' ? (accountId as number | undefined) : undefined,
+          card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
+          installment_id: newInstallmentId,
+          installment_num: paymentMethod === 'credit' ? 1 : undefined,
+          status: 'pending',
+        });
+      }
+
+      // Atualizar limite do cartão se for transação de crédito (Consome o TOTAL)
       if (paymentMethod === 'credit' && typeof cardId === 'number') {
         await updateCardLimit(cardId, amountValue);
       }
@@ -194,6 +221,7 @@ const TransactionForm: React.FC = () => {
       resetForm();
       setIsModalOpen(false);
     } catch (err) {
+      console.error(err);
       setError('Erro ao adicionar transação');
     }
   };
@@ -206,7 +234,7 @@ const TransactionForm: React.FC = () => {
 
   const tryToCloseModal = () => {
     const hasData = description || amount || type !== 'income' || date !== new Date().toISOString().split('T')[0];
-    
+
     if (hasData) {
       // Abrir modal de confirmação
       setIsConfirmModalOpen(true);
@@ -290,7 +318,7 @@ const TransactionForm: React.FC = () => {
             {/* Cabeçalho da modal */}
             <div className="flex items-center justify-between p-4 border-b border-gray-800">
               <h2 className="text-lg font-semibold text-white">Nova Transação</h2>
-              <button 
+              <button
                 onClick={tryToCloseModal}
                 className="p-1 text-gray-400 hover:text-gray-300"
               >
@@ -306,7 +334,7 @@ const TransactionForm: React.FC = () => {
                     {error}
                   </div>
                 )}
-                
+
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
                     Descrição
@@ -320,7 +348,7 @@ const TransactionForm: React.FC = () => {
                     className="w-full p-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-300"
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
                     Valor
@@ -350,35 +378,33 @@ const TransactionForm: React.FC = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <span className="block text-sm font-medium text-gray-300 mb-2">Tipo</span>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setType('income')}
-                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                        type === 'income'
-                          ? 'bg-emerald-900/40 text-emerald-300 border-2 border-emerald-500'
-                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-                      }`}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${type === 'income'
+                        ? 'bg-emerald-900/40 text-emerald-300 border-2 border-emerald-500'
+                        : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                        }`}
                     >
                       Receita
                     </button>
                     <button
                       type="button"
                       onClick={() => setType('expense')}
-                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                        type === 'expense'
-                          ? 'bg-red-900/40 text-red-300 border-2 border-red-500'
-                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-                      }`}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${type === 'expense'
+                        ? 'bg-red-900/40 text-red-300 border-2 border-red-500'
+                        : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                        }`}
                     >
                       Despesa
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Categoria */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -407,22 +433,20 @@ const TransactionForm: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('pix_debit')}
-                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                        paymentMethod === 'pix_debit'
-                          ? 'bg-blue-900/40 text-blue-300 border-2 border-blue-500'
-                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-                      }`}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${paymentMethod === 'pix_debit'
+                        ? 'bg-blue-900/40 text-blue-300 border-2 border-blue-500'
+                        : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                        }`}
                     >
                       Pix/Débito
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('credit')}
-                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${
-                        paymentMethod === 'credit'
-                          ? 'bg-purple-900/40 text-purple-300 border-2 border-purple-500'
-                          : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
-                      }`}
+                      className={`py-3 rounded-lg flex items-center justify-center font-medium transition-all duration-300 ${paymentMethod === 'credit'
+                        ? 'bg-purple-900/40 text-purple-300 border-2 border-purple-500'
+                        : 'bg-gray-800 text-gray-300 border-2 border-transparent hover:bg-gray-700'
+                        }`}
                     >
                       Crédito
                     </button>
@@ -442,7 +466,7 @@ const TransactionForm: React.FC = () => {
                         selectedId={cardId}
                         onSelect={setCardId}
                       />
-                      
+
                       {/* Opções de Parcelamento para Cartão de Crédito */}
                       {showInstallmentOptions && (
                         <div className="mt-4">
@@ -464,7 +488,7 @@ const TransactionForm: React.FC = () => {
                                 {installmentNum === 1 ? 'vez' : 'vezes'}
                               </span>
                             </div>
-                            
+
                             {installmentNum > 1 && (
                               <div className="bg-gray-800 p-3 rounded-lg">
                                 <p className="text-sm text-gray-400">
@@ -503,13 +527,13 @@ const TransactionForm: React.FC = () => {
               <div className="bg-yellow-900/30 p-3 rounded-full">
                 <AlertCircle className="w-6 h-6 text-yellow-500" />
               </div>
-              
+
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-white mb-2">Descartar alterações?</h3>
                 <p className="text-gray-400 mb-4">
                   Tem certeza que deseja fechar? Os dados não salvos serão perdidos.
                 </p>
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={cancelClose}
