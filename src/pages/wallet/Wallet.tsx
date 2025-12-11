@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
 import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
 import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
 import { useTransactions } from '../../context/TransactionsContext';
 import { Card, CardFormValues } from '../../features/wallet/types/card';
-import { CreditCard, Plus, Wallet as WalletIcon, TrendingUp } from 'lucide-react';
+import { CreditCard, Plus, Wallet as WalletIcon, TrendingUp, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
 const Wallet: React.FC = () => {
@@ -66,82 +67,102 @@ const Wallet: React.FC = () => {
     setSelectedCard(null);
   };
 
-  if (error) return <div className="h-full bg-gray-950 flex items-center justify-center text-red-400">Erro: {error}</div>;
+  if (error) return (
+    <div className="h-full min-h-[50vh] flex items-center justify-center text-red-400">
+      <AlertCircle className="w-6 h-6 mr-2" />
+      <span>Erro: {error}</span>
+    </div>
+  );
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl pb-20">
-      {/* Page Title & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Carteira</h1>
-          <p className="text-gray-400">Gerencie seus cartões de crédito e limites</p>
-        </div>
-        <button
-          onClick={handleAdd}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 shadow-lg shadow-emerald-900/20 transition-all hover:scale-105"
-        >
-          <Plus className="w-5 h-5" />
-          Adicionar Cartão
-        </button>
-      </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-8 max-w-6xl space-y-10"
+    >
+      {/* Header & Stats Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
 
-      {/* Global Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <WalletIcon className="w-24 h-24 text-blue-500" />
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl shadow-lg shadow-indigo-500/20">
+                <WalletIcon className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Carteira</h1>
+            </div>
+            <p className="text-gray-400 max-w-lg text-sm leading-relaxed">
+              Gerencie seus limites de crédito, controle faturas e acompanhe seus gastos em tempo real com inteligência.
+            </p>
           </div>
-          <p className="text-sm font-medium text-gray-400 mb-1">Limite Total</p>
-          <h3 className="text-2xl font-bold text-white">{formatCurrency(stats.totalLimit)}</h3>
+
+          <div className="flex gap-4">
+            <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
+              <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Disponível Total</span>
+              <motion.div
+                key={stats.totalAvailable}
+                initial={{ scale: 0.95, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-2xl font-bold text-emerald-400"
+              >
+                {formatCurrency(stats.totalAvailable)}
+              </motion.div>
+            </div>
+
+            <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
+              <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Fatura Total</span>
+              <motion.div
+                key={stats.totalUsed}
+                initial={{ scale: 0.95, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-2xl font-bold text-amber-400"
+              >
+                {formatCurrency(stats.totalUsed)}
+              </motion.div>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <CreditCard className="w-24 h-24 text-emerald-500" />
-          </div>
-          <p className="text-sm font-medium text-gray-400 mb-1">Limite Disponível</p>
-          <h3 className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.totalAvailable)}</h3>
+        {/* Usage Bar */}
+        <div className="relative mt-8 bg-gray-700/50 h-2 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full rounded-full ${stats.usagePercent > 80 ? 'bg-red-500' : stats.usagePercent > 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(stats.usagePercent, 100)}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          />
         </div>
-
-        <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl relative overflow-hidden group">
-          <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingUp className="w-24 h-24 text-amber-500" />
-          </div>
-          <p className="text-sm font-medium text-gray-400 mb-1">Limite Utilizado</p>
-          <div className="flex items-end gap-2">
-            <h3 className="text-2xl font-bold text-amber-400">{formatCurrency(stats.totalUsed)}</h3>
-            <span className="text-sm text-gray-500 mb-1">({Math.round(stats.usagePercent)}%)</span>
-          </div>
-          <div className="w-full bg-gray-800 h-1.5 mt-3 rounded-full overflow-hidden">
-            <div
-              className="bg-amber-500 h-full rounded-full transition-all duration-1000"
-              style={{ width: `${stats.usagePercent}%` }}
-            />
-          </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium">
+          <span>0%</span>
+          <span className="text-gray-300">Comprometimento Total: {Math.round(stats.usagePercent)}%</span>
+          <span>100%</span>
         </div>
       </div>
 
       {/* Cards Grid */}
-      <div>
-        <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-gray-400" />
-          Meus Cartões
-        </h2>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center px-1">
+          <h2 className="text-xl font-semibold text-gray-200 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-indigo-400" />
+            Seus Cartões
+          </h2>
+        </div>
 
         {cards.length === 0 ? (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center"
+          >
             <div className="bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <CreditCard className="w-8 h-8 text-gray-600" />
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">Nenhum cartão cadastrado</h3>
-            <p className="text-gray-400 mb-6 max-w-sm mx-auto">Adicione seus cartões de crédito para controlar seus limites e faturas em um só lugar.</p>
-            <button
-              onClick={handleAdd}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-            >
-              Adicionar Cartão Agora
-            </button>
-          </div>
+            <h3 className="text-lg font-medium text-white mb-2">Sua carteira está vazia</h3>
+            <p className="text-gray-400 mb-6 max-w-sm mx-auto">Adicione seu primeiro cartão de crédito para começar a controlar seus gastos.</p>
+          </motion.div>
         ) : (
           <CreditCardList
             cards={cards}
@@ -151,6 +172,24 @@ const Wallet: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Add Button */}
+      <motion.div
+        className="flex justify-center pt-8 pb-12"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <button
+          onClick={handleAdd}
+          className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gray-800 hover:bg-gray-700 text-indigo-400 rounded-2xl font-semibold border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg shadow-indigo-900/20 transition-all duration-300 overflow-hidden"
+        >
+          <span className="relative z-10 flex items-center gap-2">
+            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+            Adicionar Novo Cartão
+          </span>
+          <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors duration-300" />
+        </button>
+      </motion.div>
 
       {/* Form Modal */}
       <CreditCardFormModal
@@ -174,7 +213,7 @@ const Wallet: React.FC = () => {
           }}
         />
       )}
-    </div>
+    </motion.div>
   );
 };
 

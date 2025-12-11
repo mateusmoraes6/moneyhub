@@ -4,6 +4,7 @@ import LimitDonutChart from '../CardChart/LimitDonutChart';
 import CardDetailsModal from '../../modals/CardDetailsModal';
 import BankIcon from '../../../../components/common/BankIcon';
 import { getBankIconUrl } from '../../../bank-accounts/data/banks';
+import { Edit2, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 
 interface CardItemProps {
   card: Card;
@@ -17,168 +18,124 @@ interface CardItemProps {
 }
 
 const CardItem: React.FC<CardItemProps> = ({
-  card, onEdit, onDelete, onSelect, limitUsed, availableLimit, percentUsed, currentInvoice
+  card, onEdit, onDelete, onSelect, availableLimit, percentUsed, currentInvoice
 }) => {
-  const [showMenu, setShowMenu] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const valorGasto = card.limit - availableLimit;
-  const percentualGasto = (valorGasto / card.limit) * 100;
 
-  let faturaColor = '';
-  if (percentualGasto <= 50) faturaColor = 'text-emerald-400';
-  else if (percentualGasto <= 80) faturaColor = 'text-amber-400';
-  else faturaColor = 'text-red-400';
-  // Use apenas os props recebidos:
+  // Determine status color scheme
+  let statusColor = 'emerald';
+  if (percentUsed > 80) statusColor = 'red';
+  else if (percentUsed > 50) statusColor = 'amber';
+
+  const getGradient = () => {
+    if (statusColor === 'red') return 'from-red-500/10 to-red-900/10 border-red-500/30 hover:border-red-500/50';
+    if (statusColor === 'amber') return 'from-amber-500/10 to-amber-900/10 border-amber-500/30 hover:border-amber-500/50';
+    return 'from-emerald-500/10 to-emerald-900/10 border-emerald-500/30 hover:border-emerald-500/50';
+  };
+
+  const getTextColor = () => {
+    if (statusColor === 'red') return 'text-red-400';
+    if (statusColor === 'amber') return 'text-amber-400';
+    return 'text-emerald-400';
+  };
+
   return (
     <>
       <div
-        className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-4 shadow-lg relative"
         onClick={() => onSelect(card)}
+        className={`group relative bg-gray-900/60 backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 w-full cursor-pointer overflow-hidden shadow-lg hover:shadow-2xl ${getGradient()}`}
       >
-        {/* Menu de 3 pontos - Agora no topo */}
-        <div className="absolute top-4 right-4 md:hidden">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-            className="text-gray-400 hover:text-white p-2"
-            type="button"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
-          </button>
+        {/* Hover Highlight */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${statusColor === 'red' ? 'from-red-500/5' : statusColor === 'amber' ? 'from-amber-500/5' : 'from-emerald-500/5'} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-          {/* Menu dropdown */}
-          {showMenu && (
-            <div
-              className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDetails(true);
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-emerald-400 hover:bg-gray-700"
-                type="button"
-              >
-                + Details
-              </button>
-              
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(card);
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-gray-700 rounded-t-lg"
-                type="button"
-              >
-                Edit
-              </button>
-              
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(card);
-                  setShowMenu(false);
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b-lg"
-                type="button"
-              >
-                Delete
-              </button>
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-gray-800 rounded-xl shadow-inner border border-gray-700 group-hover:border-gray-600 transition-colors">
+                <BankIcon
+                  iconUrl={getBankIconUrl(card.bank_name)}
+                  bankName={card.bank_name}
+                  size="md"
+                />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-100 leading-tight flex items-center gap-2">
+                  {card.bank_name}
+                  {statusColor === 'red' && <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />}
+                </h3>
+                <div className={`h-1 w-8 rounded-full bg-gradient-to-r ${statusColor === 'red' ? 'from-red-500/50 via-red-500 to-red-500/50' : statusColor === 'amber' ? 'from-amber-500/50 via-amber-500 to-amber-500/50' : 'from-emerald-500/50 via-emerald-500 to-emerald-500/50'}`} />
+              </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Bloco 1 — Identificação */}
-        <div className="flex items-center gap-3 mb-4">
-          <BankIcon
-            iconUrl={getBankIconUrl(card.bank_name)}
-            bankName={card.bank_name}
-            size="md"
-          />
-          <div>
-            <h3 className="text-lg font-semibold text-white">{card.bank_name}</h3>
+          {/* Actions */}
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-x-4 group-hover:translate-x-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(card); }}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+              title="Editar"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(card); }}
+              className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+              title="Excluir"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Bloco 2 — Limite disponível */}
-        <div className="mb-3 space-y-1">
-          {/* Limite disponível */}
-          <div>
-            <p className="text-xs text-gray-400">Limite disponível</p>
-            <p className={`text-lg font-bold ${availableLimit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              R$ {availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-gray-500">
-              Limite total: R$ {card.limit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
+        {/* Body Grid */}
+        <div className="grid grid-cols-2 gap-4 items-center">
+
+          {/* Limit Info */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Disponível</p>
+              <p className={`text-xl font-bold ${getTextColor()}`}>
+                R$ {availableLimit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Fatura Atual</p>
+              <p className="text-lg font-bold text-gray-200">
+                R$ {currentInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+          </div>
+
+          {/* Chart Area */}
+          <div className="flex justify-end">
+            <div className="relative" style={{ width: 100, height: 100 }}>
+              <LimitDonutChart
+                limiteTotal={card.limit}
+                limiteDisponivel={availableLimit}
+                size={100}
+              />
+              {/* Percentage Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span className={`text-xs font-bold ${getTextColor()}`}>{Math.round(percentUsed)}%</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bloco 3 e 4 — Fatura atual e Gráfico */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm text-gray-400">Fatura atual</p>
-            <p className={`text-lg font-semibold ${faturaColor}`}>
-              R$ {currentInvoice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
+        {/* Footer Info */}
+        <div className="mt-6 pt-4 border-t border-gray-700/50 flex justify-between items-center text-xs text-gray-400">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Fecha dia {card.closing_day}</span>
           </div>
-          <LimitDonutChart
-            limiteTotal={card.limit}
-            limiteDisponivel={availableLimit}
-            size={64}
-          />
-        </div>
-
-        {/* Bloco 5 — Fechamento e Vencimento */}
-        <div className="mb-4">
-          <p className="text-xs text-gray-500">
-            Fechamento: dia {card.closing_day} | Vencimento: dia {card.due_day}
-          </p>
-        </div>
-
-        {/* Bloco 6 — Ações (apenas para desktop) */}
-        <div className="hidden md:flex justify-end gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDetails(true);
-            }}
-            className="text-sm text-emerald-400 hover:underline px-2 py-1"
-            type="button"
-          >
-            + Detalhes
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(card);
-            }}
-            className="text-sm text-blue-400 hover:underline px-2 py-1"
-            type="button"
-          >
-            Editar
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(card);
-            }}
-            className="text-sm text-red-400 hover:underline px-2 py-1"
-            type="button"
-          >
-            Excluir
-          </button>
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <span>Vence dia {card.due_day}</span>
+          </div>
         </div>
       </div>
 
-      {/* Modal de Detalhes */}
       <CardDetailsModal
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
