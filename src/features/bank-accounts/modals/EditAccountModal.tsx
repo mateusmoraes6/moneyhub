@@ -26,11 +26,11 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({ isOpen, onClose, on
     });
   }, [account]);
 
-  const handleSelectBank = (bank_name: typeof banks[0]) => {
+  const handleSelectBank = (bank: typeof banks[0]) => {
     setForm(prev => ({
       ...prev,
-      nome_banco: bank_name.nome,
-      icone_url: bank_name.icone,
+      nome_banco: bank.name,
+      icone_url: bank.icon,
     }));
     setShowBankSelector(false);
   };
@@ -99,13 +99,13 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({ isOpen, onClose, on
                   <div className="p-2 space-y-2">
                     {banks.map((bank) => (
                       <button
-                        key={bank.nome}
+                        key={bank.name}
                         type="button"
                         onClick={() => handleSelectBank(bank)}
                         className="w-full p-3 flex items-center gap-3 hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        <img src={bank.icone} alt={bank.nome} className="w-6 h-6" />
-                        <span className="font-medium text-white">{bank.nome}</span>
+                        <img src={bank.icon} alt={bank.name} className="w-6 h-6" />
+                        <span className="font-medium text-white">{bank.name}</span>
                       </button>
                     ))}
                   </div>

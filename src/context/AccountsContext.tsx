@@ -91,7 +91,7 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       setLoading(false);
     };
-    
+
     checkUser();
 
     return () => {
@@ -211,6 +211,15 @@ export const AccountsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Deletar conta
   const deleteAccount = useCallback(async (accountId: number) => {
     try {
+      // Primeiro, deletar todas as transações associadas a esta conta
+      const { error: transactionsError } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('account_id', accountId);
+
+      if (transactionsError) throw transactionsError;
+
+      // Depois, deletar a conta
       const { error } = await supabase
         .from('accounts')
         .delete()

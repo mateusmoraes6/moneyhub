@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Building2, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AccountDetailsModal from '../../features/bank-accounts/modals/AccountDetailsModal';
 import AddAccountModal from '../../features/bank-accounts/modals/AddAccountModal';
 import AccountList from '../../features/bank-accounts/components/AccountList/AccountList';
@@ -7,11 +8,10 @@ import { useCurrencyFormat } from '../../features/bank-accounts/hooks/useCurrenc
 import { useAccountModals } from '../../features/bank-accounts/hooks/useAccountModals';
 import { useAccounts } from '../../context/AccountsContext';
 import { useTransactions } from '../../context/TransactionsContext';
-import { useAccountDetails } from '../../features/bank-accounts/hooks/useAccountDetails';
+import { useAccountDetails, gerarHistoricoSaldo } from '../../features/bank-accounts/hooks/useAccountDetails';
 import { Account } from '../../features/bank-accounts/types/account';
 import { BankAccountSummary } from '../../types/index';
 import ConfirmModal from '../../components/common/ConfirmModal';
-import { gerarHistoricoSaldo } from '../../features/bank-accounts/hooks/useAccountDetails';
 
 const normalizeBankName = (name: string) => {
   return name
@@ -49,7 +49,6 @@ const BankAccounts: React.FC = () => {
 
   const [accountToDelete, setAccountToDelete] = React.useState<Account | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
-  // const [accountToEdit, setAccountToEdit] = React.useState<Account | null>(null);
   const [pendingEditData, setPendingEditData] = React.useState<Account | null>(null);
   const [isEditConfirmOpen, setIsEditConfirmOpen] = React.useState(false);
 
@@ -65,7 +64,7 @@ const BankAccounts: React.FC = () => {
       numero_conta: '',
       icone_url: `/icons/${normalizeBankName(acc.bank_name)}.svg`,
       saldo: acc.balance,
-      historico_saldo: gerarHistoricoSaldo(acc.id, transactions), // <-- Aqui está a mudança!
+      historico_saldo: gerarHistoricoSaldo(acc.id, transactions),
     })),
     [accounts, transactions]
   );
@@ -80,7 +79,6 @@ const BankAccounts: React.FC = () => {
   };
 
   const handleUpdateAccount = (account: Account) => {
-    // setAccountToEdit(account);
     setPendingEditData(account);
     setIsEditConfirmOpen(true);
   };
@@ -120,32 +118,64 @@ const BankAccounts: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-full bg-gray-950 flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
-          <p className="mt-4">Carregando contas...</p>
-        </div>
+      <div className="h-full min-h-[50vh] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
+          <p className="text-gray-400">Carregando contas...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3">
-          <div className="bg-emerald-500 rounded-full p-2">
-            <Building2 className="h-6 w-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-semibold text-white">Contas Bancárias</h1>
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-8 max-w-6xl space-y-10"
+    >
+      {/* Header & Total Balance Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
 
-        <div className="flex justify-between items-center">
-          {/* <div className="text-left"> */}
-          <p className="text-sm text-gray-400">Saldo Total</p>
-          <p className="text-xl font-bold text-emerald-400">
-            {formatCurrency(totalBalance)}
-          </p>
-          {/* </div> */}
+        <div className="relative flex flex-col md:flex-row justify-between items-end gap-6 z-10">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg shadow-emerald-500/20">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Contas Bancárias</h1>
+            </div>
+            <p className="text-gray-400 max-w-lg text-sm leading-relaxed">
+              Monitore seus saldos, acompanhe transações e gerencie todas as suas contas bancárias em um painel unificado e inteligente.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
+            <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Saldo Global</span>
+            <motion.div
+              key={totalBalance}
+              initial={{ scale: 0.95, opacity: 0.5 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-200"
+            >
+              {formatCurrency(totalBalance)}
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Account List */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center px-2">
+          <h2 className="text-xl font-semibold text-gray-200">Suas Contas</h2>
+          {/* Optional: Add sort/filter controls here later */}
         </div>
 
         <AccountList
@@ -156,23 +186,34 @@ const BankAccounts: React.FC = () => {
         />
       </div>
 
-      <div className="flex justify-center mt-8">
+      {/* Add Button - Floating styling but inline position */}
+      <motion.div
+        className="flex justify-center pt-8 pb-12"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
         <button
           onClick={openAddAccount}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-medium text-sm flex items-center gap-2 shadow"
+          className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded-2xl font-semibold border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-900/20 transition-all duration-300 overflow-hidden"
         >
-          <Plus className="w-4 h-4" />
-          Adicionar Conta
+          <span className="relative z-10 flex items-center gap-2">
+            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+            Adicionar Nova Conta
+          </span>
+          <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors duration-300" />
         </button>
-      </div>
+      </motion.div>
 
-      {selectedAccountDetails && (
-        <AccountDetailsModal
-          isOpen={isModalOpen}
-          onClose={closeAccountDetails}
-          account={selectedAccountDetails}
-        />
-      )}
+      {/* Modals */}
+      <AnimatePresence>
+        {selectedAccountDetails && (
+          <AccountDetailsModal
+            isOpen={isModalOpen}
+            onClose={closeAccountDetails}
+            account={selectedAccountDetails}
+          />
+        )}
+      </AnimatePresence>
 
       <AddAccountModal
         isOpen={isAddModalOpen}
@@ -183,7 +224,7 @@ const BankAccounts: React.FC = () => {
       <ConfirmModal
         isOpen={isConfirmOpen}
         title="Confirmar Exclusão"
-        description="Tem certeza que deseja excluir esta conta?"
+        description="Tem certeza que deseja excluir esta conta? O histórico será perdido."
         onConfirm={confirmDelete}
         onCancel={() => { setIsConfirmOpen(false); setAccountToDelete(null); }}
       />
@@ -195,8 +236,8 @@ const BankAccounts: React.FC = () => {
         onConfirm={confirmEdit}
         onCancel={() => { setIsEditConfirmOpen(false); setPendingEditData(null); }}
       />
-    </div>
+    </motion.div>
   );
 };
 
-export default BankAccounts; 
+export default BankAccounts;
