@@ -4,6 +4,8 @@ import FinancialSummary from './FinancialSummary';
 import FutureProjectionCard from './FutureProjectionCard';
 import { useAccounts } from '../../../context/AccountsContext';
 
+import AccountBalancesCard from './AccountBalancesCard';
+
 const SummaryCarousel: React.FC = () => {
     const { accounts } = useAccounts();
     const totalBalance = accounts.reduce((acc, account) => acc + Number(account.balance), 0);
@@ -11,7 +13,8 @@ const SummaryCarousel: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const slides = [
         <FinancialSummary totalBalance={totalBalance} />,
-        <FutureProjectionCard />
+        <FutureProjectionCard />,
+        <AccountBalancesCard />
     ];
 
     const nextSlide = () => {

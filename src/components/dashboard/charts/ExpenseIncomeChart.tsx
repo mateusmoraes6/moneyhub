@@ -64,24 +64,30 @@ const ExpenseIncomeChart: React.FC = () => {
     plugins: {
       legend: {
         position: 'top' as const,
+        align: 'end' as const,
         labels: {
-          color: '#d1d5db',
+          color: '#9ca3af',
+          usePointStyle: true,
+          pointStyle: 'circle',
+          boxWidth: 8,
           font: {
-            size: 12
+            size: 11,
+            family: "'Inter', sans-serif"
           }
         }
       },
       tooltip: {
-        backgroundColor: '#1f2937',
+        backgroundColor: 'rgba(17, 24, 39, 0.9)',
         titleColor: '#f9fafb',
         bodyColor: '#e5e7eb',
-        borderColor: '#374151',
+        borderColor: 'rgba(75, 85, 99, 0.4)',
         borderWidth: 1,
-        padding: 10,
-        cornerRadius: 8,
+        padding: 12,
+        cornerRadius: 12,
         displayColors: true,
+        usePointStyle: true,
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -100,28 +106,42 @@ const ExpenseIncomeChart: React.FC = () => {
     scales: {
       x: {
         grid: {
-          color: 'rgba(75, 85, 99, 0.2)'
+          display: false,
+          drawBorder: false,
         },
         ticks: {
-          color: '#9ca3af'
+          color: '#6b7280',
+          font: {
+            size: 11
+          }
         }
       },
       y: {
+        border: {
+          display: false
+        },
         grid: {
-          color: 'rgba(75, 85, 99, 0.2)'
+          color: 'rgba(75, 85, 99, 0.1)',
+          drawBorder: false,
         },
         ticks: {
-          color: '#9ca3af',
-          callback: function(value: any) {
-            return new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-              maximumFractionDigits: 0
-            }).format(value);
+          color: '#6b7280',
+          font: {
+            size: 10
+          },
+          callback: function (value: any) {
+            if (value >= 1000) {
+              return 'R$ ' + (value / 1000).toFixed(0) + 'k';
+            }
+            return value;
           }
         },
         beginAtZero: true
       }
+    },
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
     },
   };
 
@@ -131,28 +151,29 @@ const ExpenseIncomeChart: React.FC = () => {
       {
         label: 'Receitas',
         data: monthlyData.incomes,
-        backgroundColor: 'rgba(16, 185, 129, 0.6)',
-        borderColor: 'rgb(16, 185, 129)',
-        borderWidth: 1,
-        borderRadius: 6,
-        hoverBackgroundColor: 'rgba(16, 185, 129, 0.8)',
+        backgroundColor: '#10b981', // Emerald 500 flat
+        borderRadius: 4,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8
       },
       {
         label: 'Despesas',
         data: monthlyData.expenses,
-        backgroundColor: 'rgba(239, 68, 68, 0.6)',
-        borderColor: 'rgb(239, 68, 68)',
-        borderWidth: 1,
-        borderRadius: 6,
-        hoverBackgroundColor: 'rgba(239, 68, 68, 0.8)',
+        backgroundColor: '#ef4444', // Red 500 flat
+        borderRadius: 4,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8
       },
     ],
   };
 
   return (
-    <div className="bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-800">
-      <h3 className="text-lg font-semibold text-white mb-4">Receitas vs. Despesas</h3>
-      <div className="h-64 w-full">
+    <div className="bg-gray-900 rounded-2xl shadow-sm border border-gray-800 flex flex-col h-full">
+      <div className="px-6 py-5 border-b border-gray-800/50">
+        <h3 className="text-base font-semibold text-white">Fluxo de Caixa Anual</h3>
+        <p className="text-xs text-gray-500 mt-1">Comparativo mensal de entradas e saídas</p>
+      </div>
+      <div className="p-4 flex-1 min-h-[300px]">
         <Bar options={options} data={data} />
       </div>
     </div>
