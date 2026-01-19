@@ -73,6 +73,74 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const processPendingTransactions = async () => {
+    try {
+      const today = new Date().toLocaleDateString('en-CA');
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      // 1. Buscar transações pendentes que já chegaram na data
+      const { data: rawPendingTxs, error: fetchError } = await (supabase as any)
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .lte('date', today);
+
+      if (fetchError) throw fetchError;
+
+      const pendingTxs = rawPendingTxs as Transaction[];
+
+      if (!pendingTxs || pendingTxs.length === 0) return;
+
+      console.log(`Processing ${pendingTxs.length} pending transactions...`);
+
+      // 2. Processar cada uma
+      for (const tx of pendingTxs) {
+        // Atualizar status para 'paid'
+        const { error: updateError } = await (supabase as any)
+          .from('transactions')
+          .update({ status: 'paid' })
+          .eq('id', tx.id);
+
+        if (updateError) console.error(`Error updating tx ${tx.id} status:`, updateError);
+        else {
+          // Se for Pix/Débito, atualizar saldo da conta
+          if (tx.payment_method === 'pix_debit' && tx.account_id) {
+            const { data: account, error: accError } = await (supabase as any)
+              .from('accounts')
+              .select('balance')
+              .eq('id', tx.account_id)
+              .single();
+
+            if (account && !accError) {
+              const newBalance = tx.type === 'expense'
+                ? account.balance - tx.amount
+                : account.balance + tx.amount;
+
+              await (supabase as any)
+                .from('accounts')
+                .update({ balance: newBalance })
+                .eq('id', tx.account_id);
+            }
+          }
+        }
+      }
+
+      // Recarregar transações após processamento
+      if (pendingTxs.length > 0) {
+        await fetchTransactions();
+        // O ideal seria também recarregar as contas, mas o AccountsContext fará isso se houver subscription ou refresh manual
+        // Como estamos no TransactionsContext, não temos acesso direto ao refreshAccounts aqui sem circularidade.
+        // Mas como é 'on mount' ou 'on load', o app provavelmente vai sincronizar.
+      }
+
+    } catch (err) {
+      console.error('Error processing pending transactions:', err);
+    }
+  };
+
   const fetchTransactions = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -96,6 +164,12 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      processPendingTransactions();
+    }
+  }, [isAuthenticated]);
 
   const addTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at' | 'user_id'>) => {
     try {

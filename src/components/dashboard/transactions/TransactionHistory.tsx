@@ -52,7 +52,12 @@ const TransactionHistory: React.FC = () => {
 
   // Filtrar transações com base nos critérios
   const getFilteredTransactions = () => {
+    const today = new Date().toLocaleDateString('en-CA');
+
     return transactions.filter(transaction => {
+      // Excluir transações futuras (Lançamentos Futuros)
+      if (transaction.date > today) return false;
+
       // Filtro por tipo (receita/despesa)
       if (filterType && transaction.type !== filterType) return false;
 

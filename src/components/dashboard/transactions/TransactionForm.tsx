@@ -162,6 +162,11 @@ const TransactionForm: React.FC = () => {
       }
 
       // Logic to add transaction(s)
+      // Logic to add transaction(s)
+      const today = new Date().toLocaleDateString('en-CA');
+      const isFuture = date > today;
+      const initialStatus = isFuture ? 'pending' : 'paid';
+
       if (paymentMethod === 'credit' && installmentNum > 1 && newInstallmentId) {
         // Split into N transactions
         const baseAmount = Math.floor((amountValue / installmentNum) * 100) / 100;
@@ -171,20 +176,23 @@ const TransactionForm: React.FC = () => {
           const instDate = new Date(date);
           // Add months correctly handling year turnover
           instDate.setMonth(instDate.getMonth() + i);
-          // Fix for end-of-month edge cases (e.g. Jan 31 -> Feb 28) if needed, but simple setMonth is usually acceptable for billing cycles roughly
+
+          const instDateString = instDate.toISOString().split('T')[0];
+          const isInstFuture = instDateString > today;
+          const instStatus = isInstFuture ? 'pending' : 'paid';
 
           await addTransaction({
             description: `${description.trim()} (${i + 1}/${installmentNum})`,
             amount: i === 0 ? firstAmount : baseAmount,
             type,
-            date: instDate.toISOString().split('T')[0],
+            date: instDateString,
             payment_method: paymentMethod,
             category_id: category,
             account_id: undefined,
             card_id: cardId as number,
             installment_id: newInstallmentId,
             installment_num: i + 1,
-            status: 'pending',
+            status: instStatus,
           });
         }
       } else {
@@ -200,16 +208,17 @@ const TransactionForm: React.FC = () => {
           card_id: paymentMethod === 'credit' ? (cardId as number | undefined) : undefined,
           installment_id: newInstallmentId,
           installment_num: paymentMethod === 'credit' ? 1 : undefined,
-          status: 'pending',
+          status: initialStatus,
         });
       }
 
-      // Atualizar limite do cartão se for transação de crédito (Consome o TOTAL)
+      // Atualizar limite do cartão se for transação de crédito (Consome o TOTAL imediatamente)
       if (paymentMethod === 'credit' && typeof cardId === 'number') {
         await updateCardLimit(cardId, amountValue);
       }
 
-      if (paymentMethod === 'pix_debit' && accountId) {
+      // Atualizar saldo da conta APENAS se for Pix/Débito E se já estiver efetivada (não futura)
+      if (paymentMethod === 'pix_debit' && accountId && initialStatus === 'paid') {
         const selectedAccount = accounts.find(acc => acc.id === Number(accountId));
         if (selectedAccount) {
           const newBalance = type === 'expense'
