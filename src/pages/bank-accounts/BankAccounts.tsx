@@ -139,31 +139,31 @@ const BankAccounts: React.FC = () => {
       className="container mx-auto px-4 py-8 max-w-6xl space-y-10"
     >
       {/* Header & Total Balance Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-5 sm:p-6 shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl" />
 
-        <div className="relative flex flex-col md:flex-row justify-between items-end gap-6 z-10">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg shadow-emerald-500/20">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Contas Bancárias</h1>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Header Row: Logo, Title, Subtitle on the left */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-2.5 rounded-lg shadow-lg shadow-emerald-500/20 flex-shrink-0">
+              <Building2 className="h-5 w-5 text-white" />
             </div>
-            <p className="text-gray-400 max-w-lg text-sm leading-relaxed">
-              Monitore seus saldos, acompanhe transações e gerencie todas as suas contas bancárias em um painel unificado e inteligente.
-            </p>
+            <div className="flex flex-col">
+              <h1 className="text-2xl sm:text-2xl font-bold text-white tracking-tight">Contas Bancárias</h1>
+              <p className="text-gray-400 text-xs sm:text-sm">Gerencie todas as suas contas bancárias</p>
+            </div>
           </div>
 
-          <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
-            <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Saldo Global</span>
+          {/* Total Balance Card */}
+          <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50 sm:items-end">
+            <span className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Saldo Global</span>
             <motion.div
               key={totalBalance}
               initial={{ scale: 0.95, opacity: 0.5 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-200"
+              className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-200 truncate"
             >
               {formatCurrency(totalBalance)}
             </motion.div>

@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
 import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
 import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
 import { useTransactions } from '../../context/TransactionsContext';
 import { Card, CardFormValues } from '../../features/wallet/types/card';
-import { CreditCard, Plus, Wallet as WalletIcon, TrendingUp, AlertCircle } from 'lucide-react';
+import { CreditCard, Plus, Wallet as WalletIcon, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
 const Wallet: React.FC = () => {
@@ -82,63 +82,69 @@ const Wallet: React.FC = () => {
       className="container mx-auto px-4 py-8 max-w-6xl space-y-10"
     >
       {/* Header & Stats Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
-        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-5 sm:p-6 shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl opacity-50" />
 
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl shadow-lg shadow-indigo-500/20">
-                <WalletIcon className="h-6 w-6 text-white" />
+        <div className="relative z-10 space-y-5">
+          {/* Header Row: Logo, Title, Subtitle on the left */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 rounded-lg shadow-lg shadow-indigo-500/20 flex-shrink-0">
+                <WalletIcon className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Carteira</h1>
+              <div className="flex flex-col">
+                <h1 className="text-2xl sm:text-2xl font-bold text-white tracking-tight">Carteira</h1>
+                <p className="text-gray-400 text-xs sm:text-sm">Gerencie seus limites de crédito</p>
+              </div>
             </div>
-            <p className="text-gray-400 max-w-lg text-sm leading-relaxed">
-              Gerencie seus limites de crédito, controle faturas e acompanhe seus gastos em tempo real com inteligência.
-            </p>
           </div>
 
-          <div className="flex gap-4">
-            <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
-              <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Disponível Total</span>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
+              <span className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Disponível</span>
               <motion.div
                 key={stats.totalAvailable}
                 initial={{ scale: 0.95, opacity: 0.5 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-2xl font-bold text-emerald-400"
+                className="text-lg sm:text-xl font-bold text-emerald-400 truncate"
               >
                 {formatCurrency(stats.totalAvailable)}
               </motion.div>
             </div>
 
-            <div className="flex flex-col items-end bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-700/50">
-              <span className="text-sm text-gray-400 font-medium mb-1 uppercase tracking-wider">Fatura Total</span>
+            <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
+              <span className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Fatura</span>
               <motion.div
                 key={stats.totalUsed}
                 initial={{ scale: 0.95, opacity: 0.5 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-2xl font-bold text-amber-400"
+                className="text-lg sm:text-xl font-bold text-amber-400 truncate"
               >
                 {formatCurrency(stats.totalUsed)}
               </motion.div>
             </div>
           </div>
-        </div>
 
-        {/* Usage Bar */}
-        <div className="relative mt-8 bg-gray-700/50 h-2 rounded-full overflow-hidden">
-          <motion.div
-            className={`h-full rounded-full ${stats.usagePercent > 80 ? 'bg-red-500' : stats.usagePercent > 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(stats.usagePercent, 100)}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          />
-        </div>
-        <div className="flex justify-between mt-2 text-xs text-gray-400 font-medium">
-          <span>0%</span>
-          <span className="text-gray-300">Comprometimento Total: {Math.round(stats.usagePercent)}%</span>
-          <span>100%</span>
+          {/* Usage Bar */}
+          <div className="space-y-2">
+            <div className="relative bg-gray-700/50 h-1.5 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${stats.usagePercent > 80 ? 'bg-red-500' : stats.usagePercent > 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(stats.usagePercent, 100)}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
+            </div>
+            <div className="flex justify-between items-center text-xs text-gray-400 font-medium">
+              <span className="hidden sm:inline">0%</span>
+              <span className="text-gray-300 text-center flex-1 sm:flex-none">
+                Comprometimento: {Math.round(stats.usagePercent)}%
+              </span>
+              <span className="hidden sm:inline">100%</span>
+            </div>
+          </div>
         </div>
       </div>
 
