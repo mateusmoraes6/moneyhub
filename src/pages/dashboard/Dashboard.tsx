@@ -12,7 +12,9 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
       <div className="space-y-6">
-        <SummaryCarousel />
+        <div className="relative z-20">
+          <SummaryCarousel />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">

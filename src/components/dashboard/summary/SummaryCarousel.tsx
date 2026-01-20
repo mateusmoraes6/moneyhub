@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import FinancialSummary from './FinancialSummary';
 import FutureProjectionCard from './FutureProjectionCard';
@@ -11,6 +11,10 @@ const SummaryCarousel: React.FC = () => {
     const totalBalance = accounts.reduce((acc, account) => acc + Number(account.balance), 0);
 
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+    const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+
     const slides = [
         <FinancialSummary totalBalance={totalBalance} />,
         <FutureProjectionCard />,
@@ -25,11 +29,74 @@ const SummaryCarousel: React.FC = () => {
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     };
 
-    // Auto-advance optional, but users usually prefer manual control for data dashboards. keeping it manual for now.
+    // Auto-advance functionality
+    const resetAutoPlay = () => {
+        if (autoPlayRef.current) {
+            clearInterval(autoPlayRef.current);
+        }
+        autoPlayRef.current = setInterval(() => {
+            nextSlide();
+        }, 4000); // time to change slide
+    };
+
+    useEffect(() => {
+        resetAutoPlay();
+        return () => {
+            if (autoPlayRef.current) {
+                clearInterval(autoPlayRef.current);
+            }
+        };
+    }, [currentIndex]);
+
+    // Touch handlers for swipe gestures
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            nextSlide();
+        }
+        if (isRightSwipe) {
+            prevSlide();
+        }
+
+        resetAutoPlay();
+    };
+
+    const handleDotClick = (index: number) => {
+        setCurrentIndex(index);
+        resetAutoPlay();
+    };
+
+    const handleButtonClick = (direction: 'next' | 'prev') => {
+        if (direction === 'next') {
+            nextSlide();
+        } else {
+            prevSlide();
+        }
+        resetAutoPlay();
+    };
 
     return (
-        <div className="relative group w-full">
-            <div className="overflow-hidden rounded-xl">
+        <div className="relative group w-full isolate z-10">
+            <div
+                className="overflow-hidden rounded-xl"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 <div
                     className="flex transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -42,16 +109,16 @@ const SummaryCarousel: React.FC = () => {
                 </div>
             </div>
 
-            {/* Navigation Buttons - Visible on hover or always on mobile? Let's make them subtle */}
+            {/* Navigation Buttons */}
             <button
-                onClick={prevSlide}
+                onClick={() => handleButtonClick('prev')}
                 className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
                 aria-label="Previous slide"
             >
                 <ChevronLeft className="w-5 h-5" />
             </button>
             <button
-                onClick={nextSlide}
+                onClick={() => handleButtonClick('next')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
                 aria-label="Next slide"
             >
@@ -59,11 +126,11 @@ const SummaryCarousel: React.FC = () => {
             </button>
 
             {/* Dots Indicators */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
                 {slides.map((_, index) => (
                     <button
                         key={index}
-                        onClick={() => setCurrentIndex(index)}
+                        onClick={() => handleDotClick(index)}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex ? 'bg-emerald-500 w-4' : 'bg-gray-600 hover:bg-gray-500'
                             }`}
                         aria-label={`Go to slide ${index + 1}`}
