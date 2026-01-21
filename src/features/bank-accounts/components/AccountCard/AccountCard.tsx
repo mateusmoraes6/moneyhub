@@ -69,8 +69,8 @@ const AccountCard: React.FC<AccountCardProps> = ({
               </div>
             </div>
 
-            {/* Actions (opacity 0 normally, 1 on hover) */}
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-x-4 group-hover:translate-x-0">
+            {/* Actions (always visible) */}
+            <div className="flex gap-1">
               <button
                 onClick={handleEdit}
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"

@@ -5,6 +5,8 @@ import { ptBR } from 'date-fns/locale';
 import { Calendar, TrendingDown, CreditCard, ChevronRight, ChevronLeft } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
+import { motion } from 'framer-motion';
+
 const FutureTransactions: React.FC = () => {
     const { transactions, loading } = useTransactions();
     const [selectedDate, setSelectedDate] = useState(() => addMonths(new Date(), 1)); // Default to next month
@@ -16,8 +18,6 @@ const FutureTransactions: React.FC = () => {
     const filteredTransactions = useMemo(() => {
         return transactions.filter(t => {
             const tDate = parseISO(t.date);
-            // Only future transactions (strict future logic could be tDate > today, but user asked for "Next Month" view logic)
-            // Here we prioritize the selected month view.
             return isSameMonth(tDate, selectedDate);
         }).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
     }, [transactions, selectedDate]);
@@ -25,8 +25,7 @@ const FutureTransactions: React.FC = () => {
     const stats = useMemo(() => {
         const total = filteredTransactions.reduce((acc, t) => {
             if (t.type === 'expense') return acc + Number(t.amount);
-            return acc; // Ignoring income for "Lançamentos Futuros" usually focuses on bills/expenses, but we can standardly subtract income if needed. 
-            // User context: "informar o lançamento futuro ... relacionado aos gastos". So Focus on Expenses.
+            return acc;
         }, 0);
 
         const creditCardTotal = filteredTransactions.reduce((acc, t) => {
@@ -48,69 +47,106 @@ const FutureTransactions: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-6 max-w-5xl text-white">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="bg-emerald-500 rounded-full p-2.5">
-                    <Calendar className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold">Lançamentos Futuros</h1>
-                    <p className="text-gray-400">Previsão de gastos e parcelas para os próximos meses</p>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="container mx-auto px-4 py-8 max-w-6xl space-y-8 text-white"
+        >
+            {/* Header & Stats Card */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-5 sm:p-6 shadow-2xl">
+                <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl opacity-50" />
+                <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl opacity-50" />
+
+                <div className="relative z-10 space-y-6">
+                    {/* Header Row: Logo, Title, Subtitle */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-2.5 rounded-lg shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                                <Calendar className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex flex-col">
+                                <h1 className="text-2xl sm:text-2xl font-bold text-white tracking-tight">Lançamentos Futuros</h1>
+                                <p className="text-gray-400 text-xs sm:text-sm">Previsão de gastos e parcelas para os próximos meses</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                        <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-1">
+                                <TrendingDown className="w-4 h-4 text-emerald-500" />
+                                <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Previsto</span>
+                            </div>
+                            <motion.div
+                                key={stats.total}
+                                initial={{ scale: 0.95, opacity: 0.5 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="text-lg sm:text-xl font-bold text-white truncate"
+                            >
+                                {formatCurrency(stats.total)}
+                            </motion.div>
+                        </div>
+
+                        <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-1">
+                                <CreditCard className="w-4 h-4 text-blue-400" />
+                                <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Cartão de Crédito</span>
+                            </div>
+                            <motion.div
+                                key={stats.creditCardTotal}
+                                initial={{ scale: 0.95, opacity: 0.5 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="text-lg sm:text-xl font-bold text-blue-400 truncate"
+                            >
+                                {formatCurrency(stats.creditCardTotal)}
+                            </motion.div>
+                        </div>
+
+                        <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Outros Gastos</span>
+                            </div>
+                            <motion.div
+                                key={stats.otherTotal}
+                                initial={{ scale: 0.95, opacity: 0.5 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="text-lg sm:text-xl font-bold text-gray-300 truncate"
+                            >
+                                {formatCurrency(stats.otherTotal)}
+                            </motion.div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* Month Navigation */}
-            <div className="flex items-center justify-between bg-gray-900 p-4 rounded-xl border border-gray-800 mb-8">
+            <div className="flex items-center justify-between bg-gray-900/50 backdrop-blur-sm p-4 rounded-xl border border-gray-800">
                 <button
                     onClick={() => handleMonthChange('prev')}
-                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-                    disabled={isSameMonth(selectedDate, addMonths(new Date(), 1))} // Limit to next month as start?
+                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors group"
+                    disabled={isSameMonth(selectedDate, addMonths(new Date(), 1))}
                 >
-                    <ChevronLeft className={`w-6 h-6 ${isSameMonth(selectedDate, addMonths(new Date(), 1)) ? 'text-gray-600' : 'text-emerald-500'}`} />
+                    <ChevronLeft className={`w-6 h-6 transition-colors ${isSameMonth(selectedDate, addMonths(new Date(), 1)) ? 'text-gray-600' : 'text-emerald-500 group-hover:text-emerald-400'}`} />
                 </button>
 
                 <div className="text-center">
-                    <h2 className="text-xl font-bold capitalize">
+                    <h2 className="text-xl font-bold capitalize text-white">
                         {format(selectedDate, 'MMMM yyyy', { locale: ptBR })}
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                         {filteredTransactions.length} lançamentos previstos
                     </p>
                 </div>
 
                 <button
                     onClick={() => handleMonthChange('next')}
-                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors group"
                 >
-                    <ChevronRight className="w-6 h-6 text-emerald-500" />
+                    <ChevronRight className="w-6 h-6 text-emerald-500 group-hover:text-emerald-400" />
                 </button>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-gray-900 p-6 rounded-2xl border border-gray-800 relative overflow-hidden">
-                    <div className="relative z-10">
-                        <p className="text-gray-400 text-sm font-medium mb-1">Total Previsto</p>
-                        <h3 className="text-3xl font-bold text-white">{formatCurrency(stats.total)}</h3>
-                    </div>
-                    <TrendingDown className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 text-emerald-500/10" />
-                </div>
-
-                <div className="bg-gray-900 p-6 rounded-2xl border border-gray-800 relative overflow-hidden">
-                    <div className="relative z-10">
-                        <p className="text-gray-400 text-sm font-medium mb-1">Cartão de Crédito</p>
-                        <h3 className="text-3xl font-bold text-blue-400">{formatCurrency(stats.creditCardTotal)}</h3>
-                    </div>
-                    <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 text-blue-500/10" />
-                </div>
-
-                <div className="bg-gray-900 p-6 rounded-2xl border border-gray-800 relative overflow-hidden">
-                    <div className="relative z-10">
-                        <p className="text-gray-400 text-sm font-medium mb-1">Outros Gastos</p>
-                        <h3 className="text-3xl font-bold text-gray-400">{formatCurrency(stats.otherTotal)}</h3>
-                    </div>
-                    <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 text-gray-500/10" />
-                </div>
             </div>
 
             {/* Transactions List */}
@@ -156,7 +192,7 @@ const FutureTransactions: React.FC = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 };
 
