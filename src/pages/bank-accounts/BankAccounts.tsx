@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, lazy, Suspense } from 'react';
 import { Building2, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AccountDetailsModal from '../../features/bank-accounts/modals/AccountDetailsModal';
 import AddAccountModal from '../../features/bank-accounts/modals/AddAccountModal';
 import AccountList from '../../features/bank-accounts/components/AccountList/AccountList';
 import { useCurrencyFormat } from '../../features/bank-accounts/hooks/useCurrencyFormat';
@@ -12,6 +11,21 @@ import { useAccountDetails, gerarHistoricoSaldo } from '../../features/bank-acco
 import { Account } from '../../features/bank-accounts/types/account';
 import { BankAccountSummary } from '../../types/index';
 import ConfirmModal from '../../components/common/ConfirmModal';
+
+// Lazy load do modal pesado (contém gráfico e cálculos complexos)
+const AccountDetailsModal = lazy(() => import('../../features/bank-accounts/modals/AccountDetailsModal'));
+
+// Placeholder para o modal
+const ModalPlaceholder = () => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+        <p className="text-gray-400 text-sm">Carregando detalhes...</p>
+      </div>
+    </div>
+  </div>
+);
 
 const normalizeBankName = (name: string) => {
   return name
@@ -206,12 +220,14 @@ const BankAccounts: React.FC = () => {
 
       {/* Modals */}
       <AnimatePresence>
-        {selectedAccountDetails && (
-          <AccountDetailsModal
-            isOpen={isModalOpen}
-            onClose={closeAccountDetails}
-            account={selectedAccountDetails}
-          />
+        {selectedAccountDetails && isModalOpen && (
+          <Suspense fallback={<ModalPlaceholder />}>
+            <AccountDetailsModal
+              isOpen={isModalOpen}
+              onClose={closeAccountDetails}
+              account={selectedAccountDetails}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
 

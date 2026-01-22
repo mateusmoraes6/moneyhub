@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { ArrowUpCircle, ArrowDownCircle, Trash2, Edit, MoreVertical, Building2, CreditCard } from 'lucide-react';
 import { Transaction } from '../../../types';
 import { useTransactions } from '../../../context/TransactionsContext';
 import { formatCurrency, formatDate } from '../../../utils/formatters';
 import { useAccounts } from '../../../context/AccountsContext';
 import BankIcon from '../../common/BankIcon';
-import TransactionEditModal from './TransactionEditModal';
+
+// Lazy load do modal de edição (só carrega quando necessário)
+const TransactionEditModal = lazy(() => import('./TransactionEditModal'));
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -46,11 +48,19 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, showBank
 
   if (isEditing) {
     return (
-      <TransactionEditModal
-        transaction={transaction}
-        onSave={handleEditSave}
-        onCancel={() => setIsEditing(false)}
-      />
+      <Suspense fallback={
+        <div className="bg-gray-900 p-4 rounded-lg shadow-sm border border-gray-700 animate-pulse">
+          <div className="h-8 bg-gray-800 rounded w-3/4 mb-4"></div>
+          <div className="h-10 bg-gray-800 rounded mb-2"></div>
+          <div className="h-10 bg-gray-800 rounded"></div>
+        </div>
+      }>
+        <TransactionEditModal
+          transaction={transaction}
+          onSave={handleEditSave}
+          onCancel={() => setIsEditing(false)}
+        />
+      </Suspense>
     );
   }
 
