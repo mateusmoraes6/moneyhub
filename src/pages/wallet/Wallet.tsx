@@ -1,7 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
-import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
+// Lazy load da modal de transações
+const CardTransactions = React.lazy(() => import('../../features/wallet/components/CardDetails/CardTransactions'));
+
+// Componente placeholder para o carregamento do modal
+const ModalPlaceholder = () => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+        <p className="text-gray-400 text-sm">Carregando transações...</p>
+      </div>
+    </div>
+  </div>
+);
 import { useWalletCards } from '../../features/wallet/hooks/useWalletCards';
 import { useTransactions } from '../../context/TransactionsContext';
 import { Card, CardFormValues } from '../../features/wallet/types/card';
@@ -191,13 +204,15 @@ const Wallet: React.FC = () => {
 
       {/* Transactions Detail Modal */}
       {showTransactions && selectedCard && (
-        <CardTransactions
-          cardId={selectedCard.id}
-          onClose={() => {
-            setShowTransactions(false);
-            setSelectedCard(null);
-          }}
-        />
+        <React.Suspense fallback={<ModalPlaceholder />}>
+          <CardTransactions
+            cardId={selectedCard.id}
+            onClose={() => {
+              setShowTransactions(false);
+              setSelectedCard(null);
+            }}
+          />
+        </React.Suspense>
       )}
     </div>
   );

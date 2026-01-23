@@ -3,7 +3,7 @@ import { Suspense, lazy } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { TransactionsProvider } from './context/TransactionsContext';
 import AuthCallback from './pages/auth/AuthCallback';
-import Login from './pages/auth/Login';
+const Login = lazy(() => import('./pages/auth/Login'));
 import PrivateRoute from './components/auth/navigation/PrivateRoute';
 import { AccountsProvider } from './context/AccountsContext';
 
@@ -31,7 +31,14 @@ function App() {
           <ThemeProvider>
             <Routes>
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/login" element={<Login />} />
+              <Route
+                path="/login"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Login />
+                  </Suspense>
+                }
+              />
               <Route
                 path="/"
                 element={
