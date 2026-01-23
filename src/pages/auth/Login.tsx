@@ -132,59 +132,32 @@ const Login = () => {
       </div>
 
       {/* Main Glass Card */}
-      <motion.div
-        className="w-full max-w-[420px] backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative z-10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-      >
+      <div className="w-full max-w-[420px] backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative z-10 animate-fade-in-up">
         {/* Header */}
         <div className="flex flex-col items-center mb-10">
-          <motion.div
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
-          >
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20 animate-scale-in" style={{ animationDelay: '200ms' }}>
             <Wallet className="w-8 h-8 text-white" />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center"
-          >
+          </div>
+          <div className="text-center animate-fadeIn" style={{ animationDelay: '300ms' }}>
             <h1 className="text-3xl font-bold text-white tracking-tight mb-2">MoneyHub</h1>
             <p className="text-gray-400 text-sm font-medium tracking-wide uppercase">
               Organizando Finanças
             </p>
-          </motion.div>
+          </div>
         </div>
 
         {/* Form */}
         <form onSubmit={isForgotPassword ? handleResetPassword : handleSubmit} className="space-y-5">
-          <AnimatePresence mode='wait'>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm text-center"
-              >
-                {error}
-              </motion.div>
-            )}
-            {successMessage && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-200 text-sm text-center"
-              >
-                {successMessage}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm text-center animate-fadeIn">
+              {error}
+            </div>
+          )}
+          {successMessage && (
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-200 text-sm text-center animate-fadeIn">
+              {successMessage}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div className="space-y-2">
@@ -225,12 +198,10 @@ const Login = () => {
             )}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 group transition-all"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 group transition-all hover:scale-105 active:scale-95"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -242,7 +213,7 @@ const Login = () => {
                 {!isForgotPassword && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
               </>
             )}
-          </motion.button>
+          </button>
 
         </form>
 
@@ -284,7 +255,7 @@ const Login = () => {
             </button>
           )}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useTransactions } from '../../../../context/TransactionsContext';
 import CardItem from './CardItem';
 
@@ -19,32 +18,12 @@ interface CreditCardListProps {
   onSelect: (card: Card) => void;
 }
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
-
 const CardList: React.FC<CreditCardListProps> = ({ cards, onEdit, onDelete, onSelect }) => {
   const { transactions } = useTransactions();
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      {cards.map(card => {
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {cards.map((card, index) => {
         const limitTotal = Number(card.limit) || 0;
         const cardTransactions = transactions.filter(t => t.card_id === card.id);
         const pendingTransactions = cardTransactions.filter(t => t.status === 'pending');
@@ -72,7 +51,11 @@ const CardList: React.FC<CreditCardListProps> = ({ cards, onEdit, onDelete, onSe
         const percentUsed = limitTotal > 0 ? Math.round((limitUsed / limitTotal) * 100) : 0;
 
         return (
-          <motion.div key={card.id} variants={item}>
+          <div 
+            key={card.id} 
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
             <CardItem
               card={card}
               onEdit={onEdit}
@@ -83,10 +66,10 @@ const CardList: React.FC<CreditCardListProps> = ({ cards, onEdit, onDelete, onSe
               percentUsed={percentUsed}
               currentInvoice={currentInvoice}
             />
-          </motion.div>
+          </div>
         );
       })}
-    </motion.div>
+    </div>
   );
 };
 

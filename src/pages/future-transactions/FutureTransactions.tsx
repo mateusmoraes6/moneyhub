@@ -5,8 +5,6 @@ import { ptBR } from 'date-fns/locale';
 import { Calendar, TrendingDown, CreditCard, ChevronRight, ChevronLeft } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-import { motion } from 'framer-motion';
-
 const FutureTransactions: React.FC = () => {
     const { transactions, loading } = useTransactions();
     const [selectedDate, setSelectedDate] = useState(() => addMonths(new Date(), 1)); // Default to next month
@@ -47,12 +45,7 @@ const FutureTransactions: React.FC = () => {
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="container mx-auto px-4 py-8 max-w-6xl space-y-8 text-white"
-        >
+        <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8 text-white animate-fade-in-up">
             {/* Header & Stats Card */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-5 sm:p-6 shadow-2xl">
                 <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl opacity-50" />
@@ -79,14 +72,12 @@ const FutureTransactions: React.FC = () => {
                                 <TrendingDown className="w-4 h-4 text-emerald-500" />
                                 <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Previsto</span>
                             </div>
-                            <motion.div
+                            <div
                                 key={stats.total}
-                                initial={{ scale: 0.95, opacity: 0.5 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="text-lg sm:text-xl font-bold text-white truncate"
+                                className="text-lg sm:text-xl font-bold text-white truncate transition-all duration-300"
                             >
                                 {formatCurrency(stats.total)}
-                            </motion.div>
+                            </div>
                         </div>
 
                         <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
@@ -94,14 +85,12 @@ const FutureTransactions: React.FC = () => {
                                 <CreditCard className="w-4 h-4 text-blue-400" />
                                 <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Cartão de Crédito</span>
                             </div>
-                            <motion.div
+                            <div
                                 key={stats.creditCardTotal}
-                                initial={{ scale: 0.95, opacity: 0.5 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="text-lg sm:text-xl font-bold text-blue-400 truncate"
+                                className="text-lg sm:text-xl font-bold text-blue-400 truncate transition-all duration-300"
                             >
                                 {formatCurrency(stats.creditCardTotal)}
-                            </motion.div>
+                            </div>
                         </div>
 
                         <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
@@ -109,14 +98,12 @@ const FutureTransactions: React.FC = () => {
                                 <Calendar className="w-4 h-4 text-gray-400" />
                                 <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Outros Gastos</span>
                             </div>
-                            <motion.div
+                            <div
                                 key={stats.otherTotal}
-                                initial={{ scale: 0.95, opacity: 0.5 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="text-lg sm:text-xl font-bold text-gray-300 truncate"
+                                className="text-lg sm:text-xl font-bold text-gray-300 truncate transition-all duration-300"
                             >
                                 {formatCurrency(stats.otherTotal)}
-                            </motion.div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -192,7 +179,7 @@ const FutureTransactions: React.FC = () => {
                     </div>
                 )}
             </div>
-        </motion.div>
+        </div>
     );
 };
 

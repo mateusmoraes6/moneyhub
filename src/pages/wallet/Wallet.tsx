@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import CreditCardList from '../../features/wallet/components/CardList/CardList';
 import CreditCardFormModal from '../../features/wallet/modals/CardFormModal';
 import CardTransactions from '../../features/wallet/components/CardDetails/CardTransactions';
@@ -75,12 +74,7 @@ const Wallet: React.FC = () => {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8 max-w-6xl space-y-10"
-    >
+    <div className="container mx-auto px-4 py-8 max-w-6xl space-y-10 animate-fade-in-up">
       {/* Header & Stats Section */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-5 sm:p-6 shadow-2xl">
         <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
@@ -104,37 +98,31 @@ const Wallet: React.FC = () => {
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
               <span className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Disponível</span>
-              <motion.div
+              <div
                 key={stats.totalAvailable}
-                initial={{ scale: 0.95, opacity: 0.5 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-lg sm:text-xl font-bold text-emerald-400 truncate"
+                className="text-lg sm:text-xl font-bold text-emerald-400 truncate transition-all duration-300"
               >
                 {formatCurrency(stats.totalAvailable)}
-              </motion.div>
+              </div>
             </div>
 
             <div className="flex flex-col bg-gray-900/50 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-700/50">
               <span className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wider">Fatura</span>
-              <motion.div
+              <div
                 key={stats.totalUsed}
-                initial={{ scale: 0.95, opacity: 0.5 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-lg sm:text-xl font-bold text-amber-400 truncate"
+                className="text-lg sm:text-xl font-bold text-amber-400 truncate transition-all duration-300"
               >
                 {formatCurrency(stats.totalUsed)}
-              </motion.div>
+              </div>
             </div>
           </div>
 
           {/* Usage Bar */}
           <div className="space-y-2">
             <div className="relative bg-gray-700/50 h-1.5 rounded-full overflow-hidden">
-              <motion.div
-                className={`h-full rounded-full ${stats.usagePercent > 80 ? 'bg-red-500' : stats.usagePercent > 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(stats.usagePercent, 100)}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ease-out ${stats.usagePercent > 80 ? 'bg-red-500' : stats.usagePercent > 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{ width: `${Math.min(stats.usagePercent, 100)}%` }}
               />
             </div>
             <div className="flex justify-between items-center text-xs text-gray-400 font-medium">
@@ -158,17 +146,13 @@ const Wallet: React.FC = () => {
         </div>
 
         {cards.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center"
-          >
+          <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 text-center animate-fadeIn">
             <div className="bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <CreditCard className="w-8 h-8 text-gray-600" />
             </div>
             <h3 className="text-lg font-medium text-white mb-2">Sua carteira está vazia</h3>
             <p className="text-gray-400 mb-6 max-w-sm mx-auto">Adicione seu primeiro cartão de crédito para começar a controlar seus gastos.</p>
-          </motion.div>
+          </div>
         ) : (
           <CreditCardList
             cards={cards}
@@ -180,14 +164,10 @@ const Wallet: React.FC = () => {
       </div>
 
       {/* Add Button */}
-      <motion.div
-        className="flex justify-center pt-8 pb-12"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
+      <div className="flex justify-center pt-8 pb-12">
         <button
           onClick={handleAdd}
-          className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gray-800 hover:bg-gray-700 text-indigo-400 rounded-2xl font-semibold border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg shadow-indigo-900/20 transition-all duration-300 overflow-hidden"
+          className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gray-800 hover:bg-gray-700 text-indigo-400 rounded-2xl font-semibold border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg shadow-indigo-900/20 transition-all duration-300 overflow-hidden hover:scale-105 active:scale-95"
         >
           <span className="relative z-10 flex items-center gap-2">
             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
@@ -195,7 +175,7 @@ const Wallet: React.FC = () => {
           </span>
           <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors duration-300" />
         </button>
-      </motion.div>
+      </div>
 
       {/* Form Modal */}
       <CreditCardFormModal
@@ -219,7 +199,7 @@ const Wallet: React.FC = () => {
           }}
         />
       )}
-    </motion.div>
+    </div>
   );
 };
 

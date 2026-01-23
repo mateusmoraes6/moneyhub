@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 const features = [
   {
     icon: "📊",
@@ -23,38 +21,13 @@ const features = [
   }
 ];
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-};
-
 const Features = () => (
-  <motion.div 
-    className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto"
-    variants={container}
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-100px" }}
-  >
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
     {features.map((feature, idx) => (
-      <motion.div
+      <div
         key={idx}
-        className="group p-8 bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-emerald-900/20 transition-all duration-300 border border-gray-800 hover:border-emerald-500/50 relative overflow-hidden"
-        variants={item}
-        whileHover={{ 
-          y: -5, 
-          boxShadow: "0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 10px 10px -5px rgba(16, 185, 129, 0.04)"
-        }}
+        className="group p-8 bg-gray-900/50 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-emerald-900/20 transition-all duration-300 border border-gray-800 hover:border-emerald-500/50 relative overflow-hidden animate-fade-in-up hover:-translate-y-1 hover:shadow-[0_20px_25px_-5px_rgba(16,185,129,0.1),0_10px_10px_-5px_rgba(16,185,129,0.04)]"
+        style={{ animationDelay: `${idx * 200}ms` }}
       >
         {/* Decorative element */}
         <div className="absolute -right-12 -top-12 w-24 h-24 bg-emerald-600/5 rounded-full group-hover:bg-emerald-600/10 transition-all duration-500"></div>
@@ -74,9 +47,9 @@ const Features = () => (
           
           <div className="mt-4 w-12 h-0.5 bg-emerald-500/30 group-hover:w-full transition-all duration-500"></div>
         </div>
-      </motion.div>
+      </div>
     ))}
-  </motion.div>
+  </div>
 );
 
 export default Features;

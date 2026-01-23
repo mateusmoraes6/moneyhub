@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Account } from '../../types/account';
 import AccountCard from '../AccountCard/AccountCard';
 
@@ -10,21 +9,6 @@ interface AccountListProps {
   onViewDetails: (account: Account) => void;
 }
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
-
 const AccountList: React.FC<AccountListProps> = ({
   accounts,
   onEdit,
@@ -32,23 +16,22 @@ const AccountList: React.FC<AccountListProps> = ({
   onViewDetails
 }) => {
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      {accounts.map((account) => (
-        <motion.div key={account.id} variants={item}>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {accounts.map((account, index) => (
+        <div 
+          key={account.id} 
+          className="animate-fade-in-up"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
           <AccountCard
             account={account}
             onEdit={onEdit}
             onDelete={onDelete}
             onViewDetails={onViewDetails}
           />
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 };
 
