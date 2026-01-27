@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import { Mail, Lock, Eye, EyeOff, Wallet, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -107,28 +106,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen h-screen bg-gray-950 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Tech Effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-full h-full bg-circuit-pattern opacity-[0.02]"></div>
-
-        {/* Animated Orbs */}
-        <motion.div
-          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.1, 0.3, 0.1]
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
       </div>
 
       {/* Main Glass Card */}

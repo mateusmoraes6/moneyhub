@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
 
   return (
     <>
-      <header className="sticky top-0 left-0 w-full z-20 bg-gray-900/50 backdrop-blur-md shadow-sm border-b border-gray-800 lg:hidden">
+      <header className="sticky top-0 left-0 w-full z-20 bg-gray-900/30 backdrop-blur-xl shadow-lg border-b border-white/10 lg:hidden">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           {/* Mobile: Ícone de menu */}
           <button

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import FinancialSummary from './FinancialSummary';
 import FutureProjectionCard from './FutureProjectionCard';
@@ -13,7 +13,6 @@ const SummaryCarousel: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
-    const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
     const slides = [
         <FinancialSummary totalBalance={totalBalance} />,
@@ -28,25 +27,6 @@ const SummaryCarousel: React.FC = () => {
     const prevSlide = () => {
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
     };
-
-    // Auto-advance functionality
-    const resetAutoPlay = () => {
-        if (autoPlayRef.current) {
-            clearInterval(autoPlayRef.current);
-        }
-        autoPlayRef.current = setInterval(() => {
-            nextSlide();
-        }, 4000); // time to change slide
-    };
-
-    useEffect(() => {
-        resetAutoPlay();
-        return () => {
-            if (autoPlayRef.current) {
-                clearInterval(autoPlayRef.current);
-            }
-        };
-    }, [currentIndex]);
 
     // Touch handlers for swipe gestures
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -71,13 +51,10 @@ const SummaryCarousel: React.FC = () => {
         if (isRightSwipe) {
             prevSlide();
         }
-
-        resetAutoPlay();
     };
 
     const handleDotClick = (index: number) => {
         setCurrentIndex(index);
-        resetAutoPlay();
     };
 
     const handleButtonClick = (direction: 'next' | 'prev') => {
@@ -86,7 +63,6 @@ const SummaryCarousel: React.FC = () => {
         } else {
             prevSlide();
         }
-        resetAutoPlay();
     };
 
     return (

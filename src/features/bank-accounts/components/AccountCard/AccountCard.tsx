@@ -65,7 +65,6 @@ const AccountCard: React.FC<AccountCardProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-100 leading-tight">{account.nome_banco}</h3>
-                <p className="text-xs text-gray-500 font-medium tracking-wide uppercase">Conta Corrente</p>
               </div>
             </div>
 

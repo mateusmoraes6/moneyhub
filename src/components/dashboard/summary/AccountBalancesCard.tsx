@@ -51,9 +51,8 @@ const AccountBalancesCard: React.FC = () => {
                 </div>
 
                 {accounts.length > 0 && (
-                    <div className="pt-2 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+                    <div className="pt-2 border-t border-gray-800 flex justify-center items-center text-xs text-gray-500">
                         <span>Total de {accounts.length} contas</span>
-                        <span className="text-emerald-500/60 font-medium">Atualizado agora</span>
                     </div>
                 )}
             </div>

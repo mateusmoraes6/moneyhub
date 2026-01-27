@@ -82,10 +82,6 @@ const FutureProjectionCard: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
-                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-xs text-blue-400 font-medium">Ver detalhes &rarr;</p>
-                </div>
             </section>
 
             {/* Modal de Lançamentos Futuros */}
