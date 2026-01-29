@@ -97,7 +97,7 @@ const SplashScreen: React.FC = () => {
                         transition={{ delay: 1, duration: 0.5 }}
                         className="text-gray-500 text-xs uppercase tracking-[0.2em] font-medium"
                     >
-                        Organizando seu futuro
+                        Organizando finanças
                     </motion.p>
                 </div>
             </div>

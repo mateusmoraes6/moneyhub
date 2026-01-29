@@ -121,7 +121,7 @@ const Login = () => {
           </div>
           <div className="text-center animate-fadeIn" style={{ animationDelay: '300ms' }}>
             <h1 className="text-3xl font-bold text-white tracking-tight mb-2">MoneyHub</h1>
-            <p className="text-gray-400 text-sm font-medium tracking-wide uppercase">
+            <p className="text-gray-400 text-sm font-medium tracking-wide">
               Organizando Finanças
             </p>
           </div>
