@@ -153,27 +153,42 @@ const FutureTransactions: React.FC = () => {
                 ) : (
                     <div className="divide-y divide-gray-800">
                         {filteredTransactions.map((transaction) => (
-                            <div key={transaction.id} className="p-4 flex items-center justify-between hover:bg-gray-800/50 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${transaction.payment_method === 'credit' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
-                                        }`}>
-                                        {transaction.payment_method === 'credit' ? <CreditCard className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                            <div key={transaction.id} className="p-4 flex items-center gap-4 hover:bg-gray-800/40 transition-all duration-300 border-l-4 border-transparent hover:border-emerald-500 group">
+                                {/* Ícone Estilizado */}
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${transaction.payment_method === 'credit'
+                                        ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20'
+                                        : 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20'
+                                    }`}>
+                                    {transaction.payment_method === 'credit' ? <CreditCard className="w-6 h-6" /> : <Calendar className="w-6 h-6" />}
+                                </div>
+
+                                {/* Conteúdo Central e Direita */}
+                                <div className="flex-1 min-w-0 py-1">
+                                    {/* Linha 1: Descrição e Valor */}
+                                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                                        <p className="font-bold text-gray-100 truncate text-base sm:text-lg">
+                                            {transaction.description}
+                                        </p>
+                                        <span className="font-black text-red-400 whitespace-nowrap text-lg">
+                                            - {formatCurrency(Number(transaction.amount))}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <p className="font-medium text-white">{transaction.description}</p>
-                                        <div className="flex items-center gap-2 text-sm text-gray-400">
+
+                                    {/* Linha 2: Data e Badge de Parcela */}
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold bg-gray-800/50 px-2 py-1 rounded-md border border-gray-700/50">
+                                            <Calendar className="w-3.5 h-3.5 opacity-60" />
                                             <span>{format(parseISO(transaction.date), 'dd/MM/yyyy')}</span>
-                                            {transaction.installment_num && (
-                                                <span className="bg-gray-800 px-2 py-0.5 rounded-full text-xs text-white border border-gray-700">
-                                                    Parcela {transaction.installment_num}
-                                                </span>
-                                            )}
                                         </div>
+
+                                        {transaction.installment_num && (
+                                            <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-blue-500/20 shadow-sm">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                                                Parcela {transaction.installment_num}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <span className="font-bold text-red-400">
-                                    - {formatCurrency(Number(transaction.amount))}
-                                </span>
                             </div>
                         ))}
                     </div>

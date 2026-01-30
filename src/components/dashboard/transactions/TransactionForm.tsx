@@ -274,13 +274,13 @@ const TransactionForm: React.FC = () => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isModalOpen, isConfirmModalOpen]);
 
-  useEffect(() => {
-    if (isModalOpen) {
-      // Foque no primeiro input quando o modal abrir
-      const firstInput = document.getElementById('description');
-      if (firstInput) firstInput.focus();
-    }
-  }, [isModalOpen]);
+  // useEffect(() => {
+  //   if (isModalOpen) {
+  //     // Foque no primeiro input quando o modal abrir
+  //     const firstInput = document.getElementById('description');
+  //     if (firstInput) firstInput.focus();
+  //   }
+  // }, [isModalOpen]);
 
   if (!isAuthenticated) {
     return (
