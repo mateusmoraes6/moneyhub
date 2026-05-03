@@ -24,16 +24,6 @@ const TransactionHistory: React.FC = () => {
 
   const ITEMS_PER_PAGE = 5;
 
-  // Formatar data para exibição em português
-  // const formatDate = (dateString: string) => {
-  //   const date = new Date(dateString);
-  //   return new Intl.DateTimeFormat('pt-BR', {
-  //     day: '2-digit',
-  //     month: '2-digit',
-  //     year: 'numeric'
-  //   }).format(date);
-  // };
-
   // Gerar opções para o seletor de mês
   const getMonthOptions = () => {
     const options = [];

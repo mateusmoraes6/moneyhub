@@ -22,7 +22,6 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     const bankName = account.nome_banco;
     const iconUrl = account.icone_url;
     const saldo = account.saldo;
-    // const extraInfo = `Saldo: R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     const saldoFormatted = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const saldoColor = saldo >= 0 ? 'text-emerald-400' : 'text-red-400';
 

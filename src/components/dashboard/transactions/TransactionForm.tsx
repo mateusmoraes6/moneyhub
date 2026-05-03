@@ -28,16 +28,6 @@ const TransactionForm: React.FC = () => {
     historico_saldo: []
   });
 
-  // const mapCardToSelector = (card: Card) => ({
-  //   id: card.id,
-  //   nome_banco: card.bank_name,
-  //   icone_url: `/icons/${normalizeBankName(card.bank_name)}.svg`,
-  //   limite_total: card.limit,
-  //   limite_disponivel: card.available_limit,
-  //   data_fechamento: card.closing_day,
-  //   data_vencimento: card.due_day
-  // });
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [description, setDescription] = useState('');
@@ -273,14 +263,6 @@ const TransactionForm: React.FC = () => {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isModalOpen, isConfirmModalOpen]);
-
-  // useEffect(() => {
-  //   if (isModalOpen) {
-  //     // Foque no primeiro input quando o modal abrir
-  //     const firstInput = document.getElementById('description');
-  //     if (firstInput) firstInput.focus();
-  //   }
-  // }, [isModalOpen]);
 
   if (!isAuthenticated) {
     return (

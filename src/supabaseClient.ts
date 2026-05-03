@@ -9,8 +9,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
-
-// export const supabase = createClient<Database>(
-//   import.meta.env.VITE_SUPABASE_URL!,
-//   import.meta.env.VITE_SUPABASE_ANON_KEY!
-// );

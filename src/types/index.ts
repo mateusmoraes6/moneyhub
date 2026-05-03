@@ -66,16 +66,13 @@ export const EXPENSE_CATEGORIES: Category[] = [
 
 export interface BankAccountSummary {
   id: number;
-  // name: string;
   bank_name: string;
   balance: number;
-  // type: 'checking' | 'savings';
   created_at: string;
 }
 
 export interface Card {
   id: number;
-  // name: string;
   bank_name: string;
   limit: number;
   available_limit: number;

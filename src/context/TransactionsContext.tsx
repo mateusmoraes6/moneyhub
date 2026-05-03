@@ -94,8 +94,6 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (!pendingTxs || pendingTxs.length === 0) return;
 
-      console.log(`Processing ${pendingTxs.length} pending transactions...`);
-
       // 2. Processar cada uma
       for (const tx of pendingTxs) {
         // Atualizar status para 'paid'

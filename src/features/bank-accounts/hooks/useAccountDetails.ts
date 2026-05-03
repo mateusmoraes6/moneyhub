@@ -11,8 +11,6 @@ const normalizeBankName = (name: string) => {
   };
 
 export function gerarHistoricoSaldo(accountId: number, transactions: Transaction[]) {
-  // Filtra transações da conta
-  // const transacoesConta = transactions.filter(t => t.account_id === accountId);
   const transacoesConta = transactions.filter(t => String(t.account_id) === String(accountId));
 
   // Agrupa por mês (ou por dia, se preferir)
