@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const menuItems = [
         { path: '/', label: 'Visão Geral', icon: LayoutDashboard },
         { path: '/bank-accounts', label: 'Contas Bancárias', icon: Building2 },
-        { path: '/wallet', label: 'Cartões de Crédito', icon: CreditCard },
+        { path: '/credit-cards', label: 'Cartões de Crédito', icon: CreditCard },
         { path: '/future-transactions', label: 'Lançamentos Futuros', icon: Calendar },
     ];
 

@@ -5,7 +5,7 @@ import { useTransactions } from '../../../context/TransactionsContext';
 import { useAccounts } from '../../../context/AccountsContext';
 import { TransactionType, PaymentMethod, BankAccountSummary } from '../../../types';
 import AccountSelector from '../../../features/bank-accounts/components/AccountSelector/AccountSelector';
-import CardSelector from '../../../features/wallet/components/CardSelector/CardSelector';
+import CardSelector from '../../../features/credit-cards/components/CardSelector/CardSelector';
 import { supabase } from '../../../supabaseClient';
 
 const TransactionForm: React.FC = () => {

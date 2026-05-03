@@ -11,7 +11,7 @@ import { AccountsProvider } from './context/AccountsContext';
 
 // Lazy load das páginas principais para reduzir bundle inicial
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
-const Wallet = lazy(() => import('./pages/wallet/Wallet'));
+const CreditCardsPage = lazy(() => import('./pages/credit-cards/CreditCardsPage'));
 const BankAccounts = lazy(() => import('./pages/bank-accounts/BankAccounts'));
 const FutureTransactions = lazy(() => import('./pages/future-transactions/FutureTransactions'));
 
@@ -60,15 +60,16 @@ function App() {
                 }
               />
               <Route
-                path="/wallet"
+                path="/credit-cards"
                 element={
                   <PrivateRoute>
                     <Suspense fallback={<PageLoader />}>
-                      <Wallet />
+                      <CreditCardsPage />
                     </Suspense>
                   </PrivateRoute>
                 }
               />
+              <Route path="/wallet" element={<Navigate to="/credit-cards" replace />} />
               <Route
                 path="/bank-accounts"
                 element={

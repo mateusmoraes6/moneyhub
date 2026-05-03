@@ -3,7 +3,7 @@ import { X, Check } from 'lucide-react';
 import { Transaction, PaymentMethod, TransactionType, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../../../types';
 import { useAccounts } from '../../../context/AccountsContext';
 import AccountSelector from '../../../features/bank-accounts/components/AccountSelector/AccountSelector';
-import CardSelector from '../../../features/wallet/components/CardSelector/CardSelector';
+import CardSelector from '../../../features/credit-cards/components/CardSelector/CardSelector';
 
 interface TransactionEditModalProps {
   transaction: Transaction;

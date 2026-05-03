@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../../supabaseClient';
 import { Card, CardFormValues } from '../types/card';
 
-export function useWalletCards(userId?: string | null) {
+export function useCreditCards(userId?: string | null) {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,6 @@ export function useWalletCards(userId?: string | null) {
   };
 
   const deleteCard = async (id: number) => {
-    // 1. Excluir transações vinculadas ao cartão
     const { error: transError } = await supabase
       .from('transactions')
       .delete()
@@ -91,7 +90,6 @@ export function useWalletCards(userId?: string | null) {
       return;
     }
 
-    // 2. Excluir parcelamentos vinculados ao cartão
     const { error: instError } = await supabase
       .from('installments')
       .delete()
@@ -103,7 +101,6 @@ export function useWalletCards(userId?: string | null) {
       return;
     }
 
-    // 3. Excluir o cartão
     const { error } = await supabase
       .from('cards')
       .delete()
